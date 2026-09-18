@@ -15,13 +15,15 @@
 <h1>Chicago Nights</h1>
 
 <h2>Support</h2>
-<p>Chicago Nights plans a night out in Chicago - pick a vibe, a budget, and a night of the week, and it builds a real route between real bars, lounges, and late-night spots, with directions for each stop.</p>
+<p>Chicago Nights plans a night out in Chicago. Pick a vibe, a budget, and a night of the week, and it builds a real route between real bars, lounges, and late-night spots, with directions for each stop.</p>
 
 <p><strong>Where does the venue data come from?</strong><br/>
-A curated list of real Chicago venues researched from local guides, refreshed periodically. If you add your own Google Places API key, the app can also look up additional venues and refresh hours automatically - this is entirely optional.</p>
+Two places. A hand-researched list of Chicago venues, written up firsthand, ships inside the app. On top of that, the app keeps its list current on your device by reading a public map directory (OpenStreetMap, via the Overpass API), which lets it add venues that have opened and retire venues recorded as closed. Venues added that way are described from what their public listing records, rather than from a firsthand visit. OpenStreetMap data is used under the Open Database License, and the required attribution appears on the app's first screen.</p>
 
 <p><strong>Does this app require an internet connection?</strong><br/>
-No, not for planning a night - the core venue list and itinerary planner work fully offline. An internet connection is only used when you tap "Directions" (to open Apple Maps) or if you've configured an optional Google Places API key for live venue lookups.</p>
+No. The venue list and the itinerary planner work fully offline, using the venues bundled with the app plus anything previously saved on your device.</p>
+
+<p>The app does use the internet when it is available. On launch it may make one read-only request to the public Overpass API to refresh the venue list, at most about once a week per install, not on every launch. If that request fails, or you are offline, the app falls back to the list it already has and keeps working. Tapping "Directions in Maps" also opens Apple Maps, which is a separate app.</p>
 
 <p><strong>Does the app use my location?</strong><br/>
 No. Chicago Nights does not request or use your location. Directions open in Apple Maps, which handles your location itself, separately from this app.</p>
@@ -29,17 +31,17 @@ No. Chicago Nights does not request or use your location. Directions open in App
 <p>Still stuck, or found a bug? Contact <a href="mailto:dman937942@gmail.com">dman937942@gmail.com</a>.</p>
 
 <h2>Privacy Policy</h2>
-<p><em>Last updated: August 2026</em></p>
+<p><em>Last updated: September 2026</em></p>
 
-<p>Chicago Nights does not collect, transmit, or share any personal data. The app has no account system and does not request your location.</p>
+<p>Chicago Nights does not collect, transmit, or share any personal data. The app has no account system, no analytics, no advertising, and does not request your location.</p>
 
-<p><strong>What data is stored:</strong> Your preferences (such as your chosen vibe, budget, or neighborhood) and a cache of venue data are kept locally on your device. This data never leaves your device - it is not transmitted to us, to Apple, or to any third party.</p>
+<p><strong>What data is stored:</strong> Your preferences (such as your chosen vibe, budget, or neighborhood) and a cache of venue data are kept locally on your device. This data never leaves your device. It is not transmitted to us, to Apple, or to any third party.</p>
 
-<p><strong>What data we fetch:</strong> Tapping "Directions" opens Apple Maps directly with the venue's name and neighborhood - this app does not access or store your location as part of that. If you've added your own Google Places API key, the app makes outbound requests to Google's Places API to look up public business information (venue names, categories, hours). These are one-way reads of public data - no personal or device information is sent as part of these requests beyond what's inherent to any standard network request.</p>
+<p><strong>What the app sends:</strong> When it refreshes the venue list, the app sends a single fixed query for public venue information in Chicago to the Overpass API at overpass-api.de. That query is the same for every user and contains no personal information, no device identifier, and nothing about you or your choices in the app. As with any request to any internet server, the operator of that server necessarily receives the network address the request came from, and their handling of it is governed by their own policies. We receive none of it, and we run no server of our own.</p>
 
-<p><strong>What data we collect:</strong> None. Chicago Nights uses no analytics or advertising SDKs and has no account system.</p>
+<p><strong>What data we collect:</strong> None. We operate no server, no account system, and no analytics. Nothing you do in this app is reported to us.</p>
 
-<p><strong>Third parties:</strong> We do not share data with third parties because we do not collect any. If you configure your own Google Places API key, your requests to Google are subject to <a href="https://policies.google.com/privacy">Google's own privacy policy</a>.</p>
+<p><strong>Third parties:</strong> The only third parties involved are the OpenStreetMap Foundation, whose public Overpass API supplies venue information as described above, and Apple Maps when you tap for directions. We share no data with anyone, because we collect none.</p>
 
 <p><strong>Children's privacy:</strong> Because no personal data is collected from any user, this app does not collect personal information from children.</p>
 
