@@ -17,19 +17,37 @@
   implementation, so this page mirrors the Arizona page's disclosures. It was
   written without access to this app's own source. Before linking it from App
   Store Connect, confirm each of these against the build you are submitting,
-  and delete any paragraph describing something this clone does not carry:
+  and remove every sentence that describes something this clone does not carry:
     1. Location: the one-time flood-alert check (UserLocationProvider and the
-       NSLocationWhenInUseUsageDescription key). If absent, use the wording on
-       nevada/privacy.html for the location question and the opening line.
-    2. News tab with on-device sentiment (NewsStore). If absent, remove the
-       News question, the news half of "On-device processing", and the news
-       items in "What data is stored" and "Data retention and deletion".
+       NSLocationWhenInUseUsageDescription key). If absent: use the wording on
+       nevada/privacy.html for the location question and for the privacy
+       policy's opening line; remove the "Location" paragraph; in "Data
+       retention and deletion" remove the sentence about your location and
+       change "The only permissions the app asks for are location and
+       notifications, and you can withdraw either" to name notifications alone.
+    2. News tab with on-device sentiment (NewsStore). If absent: remove the News
+       question, the news half of "On-device processing", the news items in
+       "What data is stored" and "Data retention and deletion", "plus water
+       news" in the first sentence, and every mention of news feeds and
+       headlines in the internet-connection answer, "What the app fetches",
+       and "Third parties".
     3. Notifications for records and user-set thresholds (WatchSync and
-       AlertThresholdStore).
+       AlertThresholdStore). If absent: remove the notifications question and
+       the "Notifications" paragraph, remove "alert thresholds" from "What data
+       is stored" and "Data retention and deletion", and change the permissions
+       sentence there to name location alone. If neither permission is asked
+       for, use the retention wording on nevada/privacy.html.
     4. Apple Watch app, and whether the Watch fetches on its own
-       (WatchLiveRefresh) or only mirrors the phone.
-    5. On-device Q&A (FoundationModels in the Explain sheet).
-    6. The data categories in the first sentence and the confidence labels.
+       (WatchLiveRefresh) or only mirrors the phone. If there is no Watch app:
+       remove the Watch question and the "Apple Watch" paragraph, and change
+       "from your iPhone and Apple Watch" to "from your device" in "Data
+       retention and deletion". If it only mirrors, use the Watch wording on
+       california/privacy.html.
+    5. On-device Q&A (FoundationModels in the Explain sheet). If absent: remove
+       the "Can I ask my own questions?" question and the Apple Intelligence
+       half of "On-device processing".
+    6. The data categories in the first sentence and the confidence labels
+       match what the app shows.
   Remove this comment once verified.
 -->
 <h1>Colorado River Lower Basin Watch</h1>
