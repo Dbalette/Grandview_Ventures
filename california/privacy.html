@@ -21,10 +21,16 @@
 Live public data from official government sources covering reservoirs, rivers, snowpack, drought, and drinking-water quality. Groundwater basin status and the State Water Project allocation are real, dated official figures, cited rather than live-fetched. Each figure in the app is labeled by how solid it is: provisional, reviewed, reported, last-known, or unavailable.</p>
 
 <p><strong>Does this app require an internet connection?</strong><br/>
-Yes. California Water Watch fetches live readings from public government water-data services to stay current.</p>
+Yes. California Water Watch fetches live readings from public government water-data services to stay current. When iOS allows it, the app may also refresh its cached readings in the background, using only Apple's own background refresh mechanism.</p>
 
 <p><strong>Does the app use my location?</strong><br/>
 No. California Water Watch does not request or use your location. It presents statewide and site-level data for fixed monitoring locations across California.</p>
+
+<p><strong>Does the app send notifications?</strong><br/>
+Only if you allow them, and only about places you follow. When a place you have saved sets a new record high or low, the app creates a notification on your device. There is no server behind it.</p>
+
+<p><strong>Does the Apple Watch app work on its own?</strong><br/>
+The Watch app mirrors your saved places and the statewide condition from your iPhone. Your iPhone sends it a fresh snapshot whenever the phone refreshes.</p>
 
 <p>Still stuck, or found a bug? Contact <a href="mailto:dman937942@gmail.com">dman937942@gmail.com</a>.</p>
 
@@ -33,15 +39,19 @@ No. California Water Watch does not request or use your location. It presents st
 
 <p>California Water Watch does not collect, transmit, or share any personal data. The app has no account system, no analytics, no advertising, and does not request your location.</p>
 
-<p><strong>What data is stored:</strong> Any preferences (such as saved locations) are kept locally on your device. This data never leaves your device. It is not transmitted to us, to Apple, or to any third party.</p>
+<p><strong>What data is stored:</strong> Your saved places and preferences, plus a cache of the most recent readings the app downloaded so it can show a last-known value when a source is unreachable, are kept locally on your device. None of it is transmitted to us, to Apple, or to any third party.</p>
 
-<p><strong>What data we fetch:</strong> The app makes outbound requests to public government water-data services to display current conditions. These are one-way reads of public data. No personal or device information is sent as part of these requests beyond what is inherent to any standard network request. As with any request to any internet server, the operators of those services necessarily receive the network address each request came from, and their handling of it is governed by their own policies. We receive none of it.</p>
+<p><strong>What the app fetches:</strong> The app makes outbound requests to public government water-data services to display current conditions. These are one-way reads of public data. No personal or device information is sent as part of these requests beyond what is inherent to any standard network request. As with any request to any internet server, the operators of those services necessarily receive the network address each request came from, and their handling of it is governed by their own policies. We receive none of it.</p>
+
+<p><strong>Notifications:</strong> If you allow them, notifications are created entirely on your device when a place you follow sets a new record, by comparing newly fetched public data against what the app saw before. Nothing is pushed from any server, and no notification content leaves your device.</p>
+
+<p><strong>Apple Watch:</strong> If you use the Apple Watch app, your iPhone sends it a snapshot of your saved places and the statewide condition with Apple's WatchConnectivity framework. That snapshot stays on your own devices and is never sent to us or to any third party.</p>
 
 <p><strong>What data we collect:</strong> None. California Water Watch uses no analytics or advertising SDKs and has no account system. Nothing you do in this app is reported to us.</p>
 
 <p><strong>Third parties:</strong> The only third parties involved are the public government data services the app reads from, as described above. We share no data with anyone, because we collect none.</p>
 
-<p><strong>Data retention and deletion:</strong> We hold nothing, so there is nothing to request the deletion of. Everything the app stores stays on your device: your preferences, such as saved locations. Deleting the app removes all of it from your device permanently. Because there is no account and nothing is sent to us, there is no consent to withdraw and no data for us to return or erase on your behalf. If you have a question about any of this, write to the address below.</p>
+<p><strong>Data retention and deletion:</strong> We hold nothing, so there is nothing to request the deletion of. Everything the app stores stays on your device, including your saved places, preferences, and cached readings. Deleting the app removes all of it from your iPhone and Apple Watch permanently. The only permission the app asks for is notifications, and you can withdraw it at any time in your device's Settings. Beyond that, because there is no account and nothing is sent to us, there is no data for us to return or erase on your behalf. If you have a question about any of this, write to the address below.</p>
 
 <p><strong>Children's privacy:</strong> Because no personal data is collected from any user, this app does not collect personal information from children.</p>
 
