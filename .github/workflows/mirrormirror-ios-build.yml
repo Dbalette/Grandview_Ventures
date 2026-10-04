@@ -80,6 +80,7 @@ jobs:
           test -f "$APP/www/vendor/tasks-vision/wasm/vision_wasm_internal.wasm"
           test -f "$APP/www/vendor/face_landmarker.task"
           test -f "$APP/www/vendor/LICENSE-MediaPipe.txt"
+          test -f "$APP/PrivacyInfo.xcprivacy"
           echo "Camera purpose string:"
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP/Info.plist"
           echo "Icons:"

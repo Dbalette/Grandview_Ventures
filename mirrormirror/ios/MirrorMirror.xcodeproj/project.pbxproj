@@ -15,6 +15,7 @@
 		B20000000000000000000006 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* AppConfig.swift */; };
 		B20000000000000000000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* Assets.xcassets */; };
 		B20000000000000000000015 /* www in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* www */; };
+		B20000000000000000000018 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		B10000000000000000000015 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		B10000000000000000000016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000000000000000000017 /* MirrorMirror.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = MirrorMirror.storekit; sourceTree = "<group>"; };
+		B10000000000000000000018 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				B10000000000000000000015 /* www */,
 				B10000000000000000000016 /* Info.plist */,
 				B10000000000000000000017 /* MirrorMirror.storekit */,
+				B10000000000000000000018 /* PrivacyInfo.xcprivacy */,
 			);
 			path = MirrorMirror;
 			sourceTree = "<group>";
@@ -135,6 +138,7 @@
 			files = (
 				B20000000000000000000014 /* Assets.xcassets in Resources */,
 				B20000000000000000000015 /* www in Resources */,
+				B20000000000000000000018 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

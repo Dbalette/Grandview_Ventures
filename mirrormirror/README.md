@@ -52,7 +52,7 @@ bash ios/prepare.sh && npm run e2e -- --bundled ios/MirrorMirror/www --video pat
 The end-to-end test serves the app, feeds Chromium a fake front camera from a `.y4m` file (make one
 with `ffmpeg -loop 1 -i face.jpg -t 2 -r 15 -vf "scale=480:640:force_original_aspect_ratio=increase,crop=480:640,format=yuv420p" face.y4m`),
 consults the mirror, uploads a photo, exercises the paywall, and writes screenshots to `tests/out/`.
-Set `MM_VISION_DIR` and `MM_MODEL_PATH` to use local copies of the library and model.
+Set `MM_VISION_DIR` and `MM_MODEL_PATH` to use local copies of the library and model, and `MM_CHROMIUM` to use a Chromium you already have (otherwise run `npx playwright install chromium` once).
 
 The iOS app is compiled and smoke-tested on a macOS runner by `.github/workflows/mirrormirror-ios-build.yml`
 (unsigned, no secrets): Debug for the simulator, Release for iPhone hardware, then it installs the app in

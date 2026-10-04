@@ -2,7 +2,8 @@
    Usage: node tests/e2e.mjs [--video path.y4m] [--photo path.jpg] [--out dir] [--bundled path/to/www]
    --bundled serves the iOS bundle (ios/MirrorMirror/www after prepare.sh) with the iOS configuration injected and
    every request to a host other than localhost blocked and counted; the test fails if the app tried to leave the device.
-   Env:   MM_VISION_DIR  path to @mediapipe/tasks-vision 0.10.35 (default: node_modules/@mediapipe/tasks-vision)
+   Env:   MM_CHROMIUM    path to an existing Chromium/Chrome binary (default: the one Playwright installed)
+          MM_VISION_DIR  path to @mediapipe/tasks-vision 0.10.35 (default: node_modules/@mediapipe/tasks-vision)
           MM_MODEL_PATH  local copy of face_landmarker.task (optional; otherwise fetched from Google) */
 import http from 'node:http';
 import fs from 'node:fs';
@@ -40,7 +41,7 @@ server.listen(0, async () => {
   const origin = `http://localhost:${server.address().port}`;
   const launchArgs = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'];
   if (VIDEO) launchArgs.push(`--use-file-for-fake-video-capture=${path.resolve(VIDEO)}`);
-  const browser = await chromium.launch({ args: launchArgs });
+  const browser = await chromium.launch({ args: launchArgs, executablePath: process.env.MM_CHROMIUM || undefined });
   const ctx = await browser.newContext({ serviceWorkers: 'block', ignoreHTTPSErrors: true, permissions: ['camera'], viewport: { width: 414, height: 896 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36' });
   const external = [];
   const isLocal = (url) => /^(localhost|127\.0\.0\.1)$/.test(url.hostname);
