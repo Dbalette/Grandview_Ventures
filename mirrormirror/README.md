@@ -28,7 +28,8 @@ own symmetry. It gives a score out of 100 and shows every formula behind it.
    inside the iOS app.
 
 Nothing leaves the device. The vision library is pinned to `@mediapipe/tasks-vision@0.10.35`, the last
-release without usage telemetry; the model is fetched once from Google's public model bucket and cached.
+release without usage telemetry. The iPhone app bundles the library, the face model and the fonts and
+makes no network request of its own; the web version fetches the library and model once and caches them.
 
 ## Run it locally
 
@@ -44,6 +45,8 @@ cd mirrormirror
 npm install                          # playwright + the pinned vision library, for the browser test
 npm test                             # engine unit tests (node:test)
 npm run e2e -- --video path/to/face.y4m --photo path/to/face.jpg
+# the iPhone configuration: serve the bundle, block and count every request that leaves localhost
+bash ios/prepare.sh && npm run e2e -- --bundled ios/MirrorMirror/www --video path/to/face.y4m --photo path/to/face.jpg
 ```
 
 The end-to-end test serves the app, feeds Chromium a fake front camera from a `.y4m` file (make one
@@ -51,11 +54,16 @@ with `ffmpeg -loop 1 -i face.jpg -t 2 -r 15 -vf "scale=480:640:force_original_as
 consults the mirror, uploads a photo, exercises the paywall, and writes screenshots to `tests/out/`.
 Set `MM_VISION_DIR` and `MM_MODEL_PATH` to use local copies of the library and model.
 
+The iOS app is compiled and smoke-tested on a macOS runner by `.github/workflows/mirrormirror-ios-build.yml`
+(unsigned, no secrets): Debug for the simulator, Release for iPhone hardware, then it installs the app in
+the simulator, launches it, and reads the page's console through a debug-only bridge to confirm the page is
+a secure context, the bundled library and model load, and the store bridge answers.
+
 ## Layout
 
 ```
-index.html  methodology.html  privacy.html  terms.html  manifest.webmanifest  sw.js
-css/style.css
+index.html  methodology.html  privacy.html  terms.html  licenses.html  manifest.webmanifest  sw.js
+css/style.css  css/fonts/
 js/  app.js  ui.js  phi.js  norms.js  landmarks.js  geometry.js  pose.js  overlay.js  hairline.js  paywall.js
 icons/  tests/  ios/
 ```

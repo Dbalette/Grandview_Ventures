@@ -30,7 +30,7 @@ Because the measurements are taken from a two-dimensional picture of a three-dim
 No, not really, and the app says so. It is an old and lovely hypothesis, popular with artists and some surgeons, but controlled studies find it a weak predictor of who people actually find attractive. Averageness, symmetry, skin and expression matter more. Treat the number as a parlour game with good arithmetic. The <a href="methodology.html">methodology page</a> gives every source.</p>
 
 <p><strong>Does it work offline?</strong><br/>
-After the first visit, yes. The page, the face model and the vision library are kept in the browser cache so the mirror opens without a connection.</p>
+Yes. The iPhone app carries everything inside it. The web version keeps the page, the face model and the vision library in the browser cache after the first visit.</p>
 
 <p><strong>Which browsers?</strong><br/>
 Safari on iOS 15 or later, Chrome on Android, and any current desktop browser. The camera needs a secure page (https), which this is.</p>
@@ -46,7 +46,7 @@ Safari on iOS 15 or later, Chrome on Android, and any current desktop browser. T
 
 <p><strong>What we collect:</strong> nothing. The app contains no analytics, no advertising, no tracking and no third-party SDKs that phone home. We cannot see who uses it or what they look like.</p>
 
-<p><strong>Third-party resources:</strong> when the page first loads, your browser downloads the face landmark model and the vision library from Google's public content servers, and two typefaces from Google Fonts. Those requests carry the ordinary information any web request does (your IP address and browser type) and are covered by Google's privacy policy. No image data is ever part of those requests; the model is downloaded once and then runs locally.</p>
+<p><strong>Third-party resources:</strong> the iPhone app contains everything it needs, including the face landmark library, the face model and its typefaces, and makes no network request of its own while you use it. The only other traffic is the App Store handling your subscription, which Apple's privacy policy covers. The web version downloads the vision library from the jsDelivr content network and the face model from Google's public model storage the first time you open it; those requests carry the ordinary information any web request does (your IP address and browser type) and are covered by those providers' own policies. No image data is ever part of those requests, and after the first visit the web version works offline. The <a href="licenses.html">open-source notices</a> list what the app is built from.</p>
 
 <p><strong>Permissions:</strong> the camera permission is requested only when you tap <em>Open the mirror</em>, and you can revoke it at any time in your browser or phone settings.</p>
 

@@ -1,5 +1,7 @@
 /* End-to-end: serve the app, feed Chromium a fake front camera, consult the mirror, and read the verdict.
-   Usage: node tests/e2e.mjs [--video path.y4m] [--photo path.jpg] [--out dir]
+   Usage: node tests/e2e.mjs [--video path.y4m] [--photo path.jpg] [--out dir] [--bundled path/to/www]
+   --bundled serves the iOS bundle (ios/MirrorMirror/www after prepare.sh) with the iOS configuration injected and
+   every request to a host other than localhost blocked and counted; the test fails if the app tried to leave the device.
    Env:   MM_VISION_DIR  path to @mediapipe/tasks-vision 0.10.35 (default: node_modules/@mediapipe/tasks-vision)
           MM_MODEL_PATH  local copy of face_landmarker.task (optional; otherwise fetched from Google) */
 import http from 'node:http';
@@ -10,8 +12,9 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const APP = path.resolve(here, '..');
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, arr) => a.startsWith('--') ? [a.slice(2), arr[i + 1]] : []).filter(Boolean));
+const BUNDLED = args.bundled ? path.resolve(args.bundled) : null;
+const APP = BUNDLED || path.resolve(here, '..');
 const VIDEO = args.video || null;
 const PHOTO = args.photo || null;
 const OUT = args.out || path.join(here, 'out');
@@ -39,21 +42,27 @@ server.listen(0, async () => {
   if (VIDEO) launchArgs.push(`--use-file-for-fake-video-capture=${path.resolve(VIDEO)}`);
   const browser = await chromium.launch({ args: launchArgs });
   const ctx = await browser.newContext({ serviceWorkers: 'block', ignoreHTTPSErrors: true, permissions: ['camera'], viewport: { width: 414, height: 896 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36' });
-  // Serve the vision library and the model locally so the test does not depend on the CDN.
-  await ctx.route(/https:\/\/(cdn\.jsdelivr\.net|unpkg\.com)\/.*@mediapipe\/tasks-vision@[^/]+\/(.*)$/, (route) => {
-    const rel = route.request().url().match(/tasks-vision@[^/]+\/(.*)$/)[1];
-    const f = path.join(VISION_DIR, rel);
-    if (!fs.existsSync(f)) return route.fulfill({ status: 404, body: 'missing ' + rel });
-    route.fulfill({ status: 200, headers: { 'content-type': MIME[path.extname(f)] || 'application/octet-stream', 'access-control-allow-origin': '*' }, body: fs.readFileSync(f) });
-  });
-  // Fonts are decoration; keep the test off the network.
-  await ctx.route(/https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/, (route) => route.abort());
-  if (MODEL_PATH) await ctx.route(/face_landmarker\.task$/, (route) => route.fulfill({ status: 200, headers: { 'content-type': 'application/octet-stream', 'access-control-allow-origin': '*' }, body: fs.readFileSync(MODEL_PATH) }));
+  const external = [];
+  const isLocal = (url) => /^(localhost|127\.0\.0\.1)$/.test(url.hostname);
+  if (BUNDLED) {
+    // The iOS configuration: library and model come from the bundle. Anything that tries to leave the device is blocked and counted.
+    await ctx.addInitScript(() => { window.MM_CONFIG = { platform: 'ios', freeScans: 3, visionBases: ['vendor/tasks-vision'], modelUrl: 'vendor/face_landmarker.task' }; });
+    await ctx.route((url) => /^https?:$/.test(url.protocol) && !isLocal(url), (route) => { external.push(route.request().url()); route.abort(); });
+  } else {
+    // The web configuration: serve the vision library (and optionally the model) from local copies so the test does not depend on the network.
+    await ctx.route(/https:\/\/(cdn\.jsdelivr\.net|unpkg\.com)\/.*@mediapipe\/tasks-vision@[^/]+\/(.*)$/, (route) => {
+      const rel = route.request().url().match(/tasks-vision@[^/]+\/(.*)$/)[1];
+      const f = path.join(VISION_DIR, rel);
+      if (!fs.existsSync(f)) return route.fulfill({ status: 404, body: 'missing ' + rel });
+      route.fulfill({ status: 200, headers: { 'content-type': MIME[path.extname(f)] || 'application/octet-stream', 'access-control-allow-origin': '*' }, body: fs.readFileSync(f) });
+    });
+    if (MODEL_PATH) await ctx.route(/face_landmarker\.task$/, (route) => route.fulfill({ status: 200, headers: { 'content-type': 'application/octet-stream', 'access-control-allow-origin': '*' }, body: fs.readFileSync(MODEL_PATH) }));
+  }
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error' && !/INFO: Created TensorFlow Lite|Failed to load resource/.test(m.text())) errors.push('console.error: ' + m.text()); });
-  page.on('requestfailed', (r) => { if (!/fonts\.(googleapis|gstatic)\.com/.test(r.url())) errors.push('requestfailed: ' + r.url() + ' ' + (r.failure() && r.failure().errorText)); });
+  page.on('requestfailed', (r) => errors.push('requestfailed: ' + r.url() + ' ' + (r.failure() && r.failure().errorText)));
 
   await page.goto(`${origin}/index.html`);
   try {
@@ -131,6 +140,7 @@ server.listen(0, async () => {
   await page.evaluate(() => localStorage.clear());
 
   check(errors.length === 0, `no page errors (${errors.length ? errors.join(' | ').slice(0, 800) : 'clean'})`);
+  if (BUNDLED) check(external.length === 0, `no request left the device (${external.length ? external.join(', ') : 'every request was served from the bundle'})`);
   await browser.close(); server.close();
   console.log(failures.length ? `\n${failures.length} FAILED` : '\nALL PASSED');
   process.exit(failures.length ? 1 : 0);

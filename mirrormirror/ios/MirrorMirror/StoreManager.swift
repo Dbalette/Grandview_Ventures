@@ -11,8 +11,6 @@ protocol StoreBridge: AnyObject {
 /// StoreKit 2: one auto-renewing subscription, Mirror Mirror Premium, US$0.99 a month.
 @MainActor
 final class StoreManager: ObservableObject {
-    static let productID = "com.grandviewventures.mirrormirror.monthly"
-
     @Published private(set) var product: Product?
     @Published private(set) var isEntitled = false
     @Published private(set) var expirationDate: Date?
@@ -37,12 +35,12 @@ final class StoreManager: ObservableObject {
     /// Load the product (once) and re-read the current entitlement from StoreKit.
     func refresh() async {
         if product == nil {
-            product = try? await Product.products(for: [Self.productID]).first
+            product = try? await Product.products(for: [AppConfig.productID]).first
         }
         var entitled = false
         var expires: Date? = nil
         for await result in Transaction.currentEntitlements {
-            if case .verified(let transaction) = result, transaction.productID == Self.productID, transaction.revocationDate == nil {
+            if case .verified(let transaction) = result, transaction.productID == AppConfig.productID, transaction.revocationDate == nil {
                 entitled = true
                 expires = transaction.expirationDate
             }
@@ -52,7 +50,7 @@ final class StoreManager: ObservableObject {
     }
 
     func statusPayload() -> [String: Any] {
-        var payload: [String: Any] = ["type": "status", "entitled": isEntitled, "productId": Self.productID]
+        var payload: [String: Any] = ["type": "status", "entitled": isEntitled, "productId": AppConfig.productID]
         if let product {
             payload["price"] = product.displayPrice
             payload["period"] = Self.periodText(product)

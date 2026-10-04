@@ -80,6 +80,8 @@ If the project refuses to open or build on your Xcode version, say so (paste the
 
 **Or from GitHub:** the workflow *Mirror Mirror - upload to TestFlight* (`.github/workflows/mirrormirror-testflight.yml`) does the same on a macOS runner. It needs six repository secrets, listed at the top of the file: an App Store Connect API key (id, issuer id, the .p8 file base64-encoded), your team id, and an Apple Distribution certificate exported as a .p12 with its password. Run it from the *Actions* tab.
 
+Every push that touches the app also runs *Mirror Mirror - iOS build and smoke test* (`.github/workflows/mirrormirror-ios-build.yml`), which needs no secrets: it compiles the app with Apple's toolchain on a macOS runner and launches it in the iOS Simulator, so compile errors show up in the *Actions* tab before you open Xcode.
+
 Either way the build appears under *TestFlight* in App Store Connect after 10 to 30 minutes of processing. Install it through TestFlight on your phone and take one more reading before submitting.
 
 ## 5. Fill in the listing (you, 20 minutes)
@@ -115,10 +117,10 @@ App Store Connect > the app > *App Store* tab > *1.0 Prepare for Submission*.
 **Support URL**: https://dbalette.github.io/Grandview_Ventures/mirrormirror/privacy.html
 **Marketing URL**: https://dbalette.github.io/Grandview_Ventures/mirrormirror/
 **Privacy Policy URL** (in *App Information*): https://dbalette.github.io/Grandview_Ventures/mirrormirror/privacy.html
-**Category**: Entertainment (secondary: Lifestyle). **Age rating**: answer *None* to everything; it comes out 4+.
+**Category**: Entertainment (secondary: Lifestyle). **Age rating**: answer the questionnaire truthfully. The app has no violence, mature themes, gambling, user-generated content, messaging, ads or web access, so it should come out 4+; Apple changes these questions from time to time, so read each one.
 **License agreement**: keep Apple's standard EULA (the app and the description link to it).
 
-**App Privacy** (*App Privacy* tab): *Data Not Collected*. The app has no server and no analytics; the camera frames are processed in memory on the device; the vision library pinned here (0.10.35) is the last release without Google's usage telemetry. Nothing is linked to the user or used for tracking.
+**App Privacy** (*App Privacy* tab): *Data Not Collected*. The app has no server and no analytics; the camera frames are processed in memory on the device; the vision library pinned here (0.10.35) is the last release without Google's usage telemetry. The iPhone app bundles the library, the face model and the fonts and makes no network request of its own, which the offline test and the simulator smoke test both check. Nothing is linked to the user or used for tracking. (Purchases are handled by Apple and are not "collected" by you.)
 
 ## 6. Submit for review (you, 5 minutes)
 
@@ -154,5 +156,6 @@ On the 1.0 version page:
 | `MirrorMirror/Info.plist` | camera purpose string, portrait only, no non-exempt encryption |
 | `MirrorMirror/MirrorMirror.storekit` | local StoreKit configuration for testing purchases without App Store Connect |
 | `MirrorMirror/www/` | the web app, copied by `prepare.sh`; `www/vendor/` (library + model) is downloaded by the same script and ignored by git |
-| `prepare.sh` | run before building: syncs the web app and fetches the vision library and face model |
+| `prepare.sh` | run before building: syncs the web app and fetches the vision library, the face model and the MediaPipe licence notice |
+| `../licenses.html` | open-source notices (MediaPipe Apache-2.0, fonts OFL), shown in the app |
 | `ExportOptions.plist` | export settings used by the GitHub workflow |

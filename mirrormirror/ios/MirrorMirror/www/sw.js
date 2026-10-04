@@ -2,13 +2,15 @@
    Shell files: cache first, refreshed in the background.
    Face model and vision library: cache first (they are versioned by URL), so the
    mirror keeps working offline once it has been opened once. */
-const VERSION = 'mm-v2';
+const VERSION = 'mm-v3';
 const SHELL = [
   './', './index.html', './methodology.html', './privacy.html', './terms.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/ui.js', './js/phi.js', './js/geometry.js', './js/landmarks.js',
-  './js/pose.js', './js/overlay.js', './js/norms.js', './js/hairline.js', './js/paywall.js', './icons/icon.svg'
+  './js/pose.js', './js/overlay.js', './js/norms.js', './js/hairline.js', './js/paywall.js', './icons/icon.svg', './licenses.html',
+  './css/fonts/PlayfairDisplay-Roman-latin.woff2', './css/fonts/PlayfairDisplay-Italic-latin.woff2',
+  './css/fonts/JosefinSans-Roman-latin.woff2', './css/fonts/JosefinSans-Italic-latin.woff2'
 ];
-const HEAVY_HOSTS = ['cdn.jsdelivr.net', 'unpkg.com', 'storage.googleapis.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+const HEAVY_HOSTS = ['cdn.jsdelivr.net', 'unpkg.com', 'storage.googleapis.com'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

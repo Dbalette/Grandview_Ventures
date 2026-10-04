@@ -82,13 +82,14 @@ function loadLandmarker() {
           outputFaceBlendshapes: true, outputFacialTransformationMatrixes: true,
           minFaceDetectionConfidence: 0.5, minFacePresenceConfidence: 0.5, minTrackingConfidence: 0.5,
         });
-        let lm;
-        try { lm = await make(isAppleWebKit() ? 'CPU' : 'GPU'); }
-        catch (e) { console.warn('GPU delegate failed, using CPU', e); lm = await make('CPU'); }
+        let lm, delegate = isAppleWebKit() ? 'CPU' : 'GPU';
+        try { lm = await make(delegate); }
+        catch (e) { console.warn('GPU delegate failed, using CPU: ' + (e && e.message || e)); delegate = 'CPU'; lm = await make('CPU'); }
         state.landmarker = lm; state.mode = 'VIDEO';
+        console.log(`[mm] model ready base=${base} delegate=${delegate}`);
         setStatus('The mirror is ready. It never sends your face anywhere.', 'ok');
         return lm;
-      } catch (e) { console.warn('vision library failed from', base, e); lastErr = e; }
+      } catch (e) { console.warn(`[mm] vision library failed from ${base}: ${e && e.message || e}`); lastErr = e; }
     }
     setStatus('The mirror could not fetch its vision library. Check your connection and reload.', 'err');
     landmarkerReady = null;
@@ -323,6 +324,7 @@ async function saveCard() {
 
 /* ----------------------------------------------------------------- wiring */
 function init() {
+  console.log(`[mm] boot ${location.href} secure=${window.isSecureContext} camera=${!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)} platform=${PAYWALL.platform}`);
   $('btn-open').addEventListener('click', () => openMirror());
   $('file-input').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; analyzePhoto(f); });
   $('btn-consult').addEventListener('click', () => consult());

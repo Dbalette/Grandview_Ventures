@@ -38,6 +38,7 @@ export function createPaywall() {
   window.__mirrorStore = {
     receive(msg) {
       if (!msg || typeof msg !== 'object') return;
+      console.log('[mm] store message ' + JSON.stringify(msg));
       if (typeof msg.entitled === 'boolean') { state.entitled = msg.entitled; write(KEYS.entitled, msg.entitled); }
       if (msg.price) state.price = msg.price;
       if (msg.period) state.period = msg.period;

@@ -16,6 +16,9 @@ struct WebView: UIViewRepresentable {
 
         let controller = WKUserContentController()
         controller.add(context.coordinator, name: "store")
+        #if DEBUG
+        controller.add(context.coordinator, name: "log")
+        #endif
         controller.addUserScript(WKUserScript(source: AppConfig.javascript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         configuration.userContentController = controller
 
@@ -43,6 +46,12 @@ struct WebView: UIViewRepresentable {
 
         // MARK: JavaScript -> Swift
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            #if DEBUG
+            if message.name == "log", let body = message.body as? [String: Any] {
+                NSLog("[web:%@] %@", (body["level"] as? String) ?? "log", (body["text"] as? String) ?? "")
+                return
+            }
+            #endif
             guard message.name == "store", let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
             Task { @MainActor in
                 switch type {

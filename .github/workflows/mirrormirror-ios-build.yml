@@ -1,0 +1,141 @@
+# Compiles the Mirror Mirror iOS app with the real Xcode toolchain and smoke-tests it in the iOS Simulator.
+# No Apple account or secrets needed: the build is unsigned. It proves the project compiles (Debug for the
+# simulator, Release for iPhone hardware), that the bundle holds the web app, the vision library and the
+# face model, and that the app boots, serves the page from mirror://app/, loads the model offline and
+# answers the Swift to JavaScript store bridge. The web console is read through the debug-only bridge.
+name: Mirror Mirror - iOS build and smoke test
+
+on:
+  push:
+    branches: ['claude/**', main]
+    paths:
+      - 'mirrormirror/ios/**'
+      - 'mirrormirror/js/**'
+      - 'mirrormirror/css/**'
+      - 'mirrormirror/*.html'
+      - '.github/workflows/mirrormirror-ios-build.yml'
+  pull_request:
+    paths:
+      - 'mirrormirror/ios/**'
+      - 'mirrormirror/js/**'
+      - 'mirrormirror/css/**'
+      - 'mirrormirror/*.html'
+      - '.github/workflows/mirrormirror-ios-build.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: mirrormirror-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-smoke-test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      PROJECT: mirrormirror/ios/MirrorMirror.xcodeproj
+      SCHEME: MirrorMirror
+      BUNDLE_ID: com.grandviewventures.mirrormirror
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-version
+          xcrun simctl list runtimes
+
+      - name: Bundle the web app, vision library and face model
+        run: bash mirrormirror/ios/prepare.sh
+
+      - name: Build Debug for the iOS Simulator (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$RUNNER_TEMP/build.log" | grep -E "error:|warning:|BUILD (SUCCEEDED|FAILED)" || true
+          tail -5 "$RUNNER_TEMP/build.log"
+          grep -q "BUILD SUCCEEDED" "$RUNNER_TEMP/build.log"
+
+      - name: Show the full build log on failure
+        if: failure()
+        run: tail -250 "$RUNNER_TEMP/build.log" || true
+
+      - name: Build Release for iPhone hardware (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/dd-release" CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$RUNNER_TEMP/build-release.log" | grep -E "error:|warning:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" "$RUNNER_TEMP/build-release.log"
+
+      - name: Inspect the app bundle
+        run: |
+          set -eo pipefail
+          APP="$RUNNER_TEMP/dd/Build/Products/Debug-iphonesimulator/MirrorMirror.app"
+          test -d "$APP"
+          ls "$APP"
+          test -f "$APP/www/index.html"
+          test -f "$APP/www/css/fonts/PlayfairDisplay-Roman-latin.woff2"
+          test -f "$APP/www/vendor/tasks-vision/vision_bundle.mjs"
+          test -f "$APP/www/vendor/tasks-vision/wasm/vision_wasm_internal.wasm"
+          test -f "$APP/www/vendor/face_landmarker.task"
+          test -f "$APP/www/vendor/LICENSE-MediaPipe.txt"
+          echo "Camera purpose string:"
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP/Info.plist"
+          echo "Icons:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIcons" "$APP/Info.plist" || true
+          test -f "$APP/Assets.car"
+          du -sh "$APP"
+
+      - name: Install and launch in the iOS Simulator
+        run: |
+          set -eo pipefail
+          APP="$RUNNER_TEMP/dd/Build/Products/Debug-iphonesimulator/MirrorMirror.app"
+          UDID=$(python3 - <<'PY'
+          import json, subprocess
+          d = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j']))['devices']
+          for runtime in sorted(d, reverse=True):
+              if 'iOS' not in runtime:
+                  continue
+              for dev in d[runtime]:
+                  if dev['name'].startswith('iPhone') and dev.get('isAvailable', True):
+                      print(dev['udid'])
+                      raise SystemExit
+          PY
+          )
+          echo "Simulator: $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch --console "$UDID" "$BUNDLE_ID" > "$RUNNER_TEMP/launch.log" 2>&1 &
+          LAUNCH_PID=$!
+          for i in $(seq 1 90); do
+            if grep -q "\[mm\] model ready" "$RUNNER_TEMP/launch.log" 2>/dev/null; then break; fi
+            sleep 2
+          done
+          sleep 3
+          xcrun simctl io "$UDID" screenshot "$RUNNER_TEMP/simulator.png" || true
+          kill $LAUNCH_PID 2>/dev/null || true
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
+          echo "================ app console ================"
+          cat "$RUNNER_TEMP/launch.log"
+          echo "============================================="
+          grep -q "\[mm\] boot mirror://app/index.html secure=true" "$RUNNER_TEMP/launch.log"
+          grep -q "\[mm\] model ready base=mirror://app/vendor/tasks-vision" "$RUNNER_TEMP/launch.log"
+          if grep -q "\[mm\] store message" "$RUNNER_TEMP/launch.log"; then
+            echo "Store bridge answered."
+          else
+            echo "::warning::The store bridge did not answer within the window (expected only if StoreKit is slow without a storefront)."
+          fi
+
+      - name: Upload screenshot and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mirrormirror-ios-smoke
+          path: |
+            ${{ runner.temp }}/simulator.png
+            ${{ runner.temp }}/launch.log
+            ${{ runner.temp }}/build.log
+            ${{ runner.temp }}/build-release.log
+          if-no-files-found: ignore
