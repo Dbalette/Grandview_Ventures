@@ -72,7 +72,7 @@ In Xcode:
 4. To test against the real sandbox instead, set the StoreKit Configuration back to *None* and sign in with the sandbox tester on the phone.
 5. Once the app has an App Store id, put its URL in `AppConfig.swift` (`appStoreURL`); the web version uses it to point people to the app.
 
-If the project refuses to open or build on your Xcode version, say so (paste the error); the project file was written by hand, not by Xcode, so it could not be compiled before it reached you.
+**What has been verified, and what has not.** On a macOS runner with Xcode 16.4 the project compiles with no Swift warnings, both Debug for the simulator and Release for iPhone hardware, and the app launched in an iPhone 17 Pro simulator on iOS 26: the page loaded from `mirror://app/` as a secure context with camera support, the bundled vision library and face model loaded with no network, and the Swift store bridge answered the page. What nobody has exercised yet, because it needs your phone and your Apple ID: the live camera on a real iPhone, a real or sandbox purchase, Restore, and the share sheet. Test those four on a device before you submit (the StoreKit test file lets you buy without being charged). If Xcode on your Mac complains about anything, paste me the error; the project file was written by hand, and Xcode 16.4 accepted it, but a different version might not.
 
 ## 4. Archive and upload (you, 5 minutes, or the GitHub Action)
 

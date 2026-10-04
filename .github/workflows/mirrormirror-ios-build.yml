@@ -115,6 +115,11 @@ jobs:
           done
           sleep 3
           xcrun simctl io "$UDID" screenshot "$RUNNER_TEMP/simulator.png" || true
+          # A small copy of the screenshot, printed as text, so the rendering can be inspected from the log alone.
+          sips -s format jpeg -s formatOptions 60 -Z 700 "$RUNNER_TEMP/simulator.png" --out "$RUNNER_TEMP/simulator-small.jpg" > /dev/null || true
+          echo "-----BEGIN SIMULATOR SCREENSHOT (base64 jpeg)-----"
+          base64 < "$RUNNER_TEMP/simulator-small.jpg" | fold -w 120 || true
+          echo "-----END SIMULATOR SCREENSHOT-----"
           kill $LAUNCH_PID 2>/dev/null || true
           xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
           echo "================ app console ================"
