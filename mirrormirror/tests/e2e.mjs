@@ -46,7 +46,12 @@ server.listen(0, async () => {
   const isLocal = (url) => /^(localhost|127\.0\.0\.1)$/.test(url.hostname);
   if (BUNDLED) {
     // The iOS configuration: library and model come from the bundle. Anything that tries to leave the device is blocked and counted.
-    await ctx.addInitScript(() => { window.MM_CONFIG = { platform: 'ios', freeScans: 3, visionBases: ['vendor/tasks-vision'], modelUrl: 'vendor/face_landmarker.task' }; });
+    await ctx.addInitScript(() => {
+      window.MM_CONFIG = { platform: 'ios', freeScans: 3, visionBases: ['vendor/tasks-vision'], modelUrl: 'vendor/face_landmarker.task' };
+      // Stand-in for the iOS app's "native" message handler (the store handler is left out so the page behaves as it does before a purchase message arrives).
+      window.__nativeMessages = [];
+      window.webkit = { messageHandlers: { native: { postMessage: (m) => window.__nativeMessages.push(m) } } };
+    });
     await ctx.route((url) => /^https?:$/.test(url.protocol) && !isLocal(url), (route) => { external.push(route.request().url()); route.abort(); });
   } else {
     // The web configuration: serve the vision library (and optionally the model) from local copies so the test does not depend on the network.
@@ -91,6 +96,16 @@ server.listen(0, async () => {
     check(r.score > 60 && r.score < 100, `camera verdict rendered with score ${r.score.toFixed(1)} (${r.tier})`);
     check(await page.$$eval('.metric', (m) => m.length) === 15, 'fifteen metric rows rendered');
     check(await page.$eval('.still-wrap canvas', (c) => c.width > 0 && c.height > 0), 'annotated still drawn');
+    // Saving the card: the iOS app hands it to the native share sheet; the web downloads a PNG.
+    if (BUNDLED) {
+      await page.click('#btn-save');
+      await page.waitForFunction(() => window.__nativeMessages.length > 0, null, { timeout: 15000 });
+      const m = await page.evaluate(() => window.__nativeMessages[0]);
+      check(m.type === 'share' && /^mirror-mirror-[\d.]+\.png$/.test(m.filename) && /^data:image\/png;base64,/.test(m.dataUrl) && m.dataUrl.length > 100000 && /out of 100/.test(m.text), `iOS save posts a native share message (${m.filename}, ${Math.round(m.dataUrl.length / 1024)} KB)`);
+    } else {
+      const [download] = await Promise.all([page.waitForEvent('download', { timeout: 20000 }), page.click('#btn-save')]);
+      check(/^mirror-mirror-[\d.]+\.png$/.test(download.suggestedFilename()), `web save downloads a PNG (${download.suggestedFilename()})`);
+    }
     await page.click('.metric-head');
     check(await page.$eval('.metric-detail', (d) => !d.hidden && d.textContent.includes('score = 100')), 'tapping a row shows the working');
     check(await page.$$eval('.verdict-hero', (h) => h.length) === 1, 'verdict rendered exactly once');

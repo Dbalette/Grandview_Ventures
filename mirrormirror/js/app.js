@@ -312,10 +312,17 @@ async function saveCard() {
   if (!state.lastResult) return;
   try { await document.fonts.ready; } catch (e) { /* fine */ }
   const canvas = composeCard(state.lastResult, state.media);
+  const text = `The mirror says ${state.lastResult.scoreRounded} out of 100: ${state.lastResult.tier.label}.`;
+  const native = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.native;
+  if (native) {
+    // Inside the iPhone app: the system share sheet (Save Image, Messages, AirDrop...) is the dependable route.
+    native.postMessage({ type: 'share', filename: `mirror-mirror-${state.lastResult.scoreRounded}.png`, dataUrl: canvas.toDataURL('image/png'), text });
+    return;
+  }
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
   const file = new File([blob], `mirror-mirror-${state.lastResult.scoreRounded}.png`, { type: 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: 'Mirror Mirror on The Wall', text: `The mirror says ${state.lastResult.scoreRounded} out of 100: ${state.lastResult.tier.label}.` }); return; }
+    try { await navigator.share({ files: [file], title: 'Mirror Mirror on The Wall', text }); return; }
     catch (e) { if (e && e.name === 'AbortError') return; }
   }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.append(a); a.click(); a.remove();

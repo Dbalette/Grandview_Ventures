@@ -16,6 +16,7 @@ struct WebView: UIViewRepresentable {
 
         let controller = WKUserContentController()
         controller.add(context.coordinator, name: "store")
+        controller.add(context.coordinator, name: "native")
         #if DEBUG
         controller.add(context.coordinator, name: "log")
         #endif
@@ -30,6 +31,9 @@ struct WebView: UIViewRepresentable {
         webView.isOpaque = false
         webView.backgroundColor = UIColor(named: "LaunchBackground")
         webView.allowsBackForwardNavigationGestures = true
+        #if DEBUG
+        if #available(iOS 16.4, *) { webView.isInspectable = true }
+        #endif
         context.coordinator.webView = webView
         store.bridge = context.coordinator
         webView.load(URLRequest(url: LocalSchemeHandler.indexURL))
@@ -52,6 +56,10 @@ struct WebView: UIViewRepresentable {
                 return
             }
             #endif
+            if message.name == "native", let body = message.body as? [String: Any], body["type"] as? String == "share" {
+                Task { @MainActor in self.share(body) }
+                return
+            }
             guard message.name == "store", let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
             Task { @MainActor in
                 switch type {
@@ -68,6 +76,21 @@ struct WebView: UIViewRepresentable {
                     break
                 }
             }
+        }
+
+        /// The result card goes to the system share sheet, which offers Save Image, Messages, AirDrop and the rest.
+        @MainActor
+        private func share(_ body: [String: Any]) {
+            guard let dataURL = body["dataUrl"] as? String, let comma = dataURL.firstIndex(of: ","),
+                  let data = Data(base64Encoded: String(dataURL[dataURL.index(after: comma)...])),
+                  let image = UIImage(data: data) else { return }
+            var items: [Any] = [image]
+            if let text = body["text"] as? String { items.append(text) }
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            let scene = scenes.first(where: { $0.activationState == .foregroundActive }) ?? scenes.first
+            guard var top = scene?.windows.first(where: { $0.isKeyWindow })?.rootViewController else { return }
+            while let presented = top.presentedViewController { top = presented }
+            top.present(UIActivityViewController(activityItems: items, applicationActivities: nil), animated: true)
         }
 
         // MARK: Swift -> JavaScript
