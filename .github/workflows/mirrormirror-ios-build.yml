@@ -68,6 +68,26 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/dd-release" CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$RUNNER_TEMP/build-release.log" | grep -E "error:|warning:|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" "$RUNNER_TEMP/build-release.log"
 
+      - name: Lint the release scripts and property lists
+        run: |
+          set -eo pipefail
+          bash -n mirrormirror/ios/release.sh
+          bash -n mirrormirror/ios/prepare.sh
+          plutil -lint mirrormirror/ios/ExportOptions.plist mirrormirror/ios/MirrorMirror/Info.plist mirrormirror/ios/MirrorMirror/PrivacyInfo.xcprivacy
+
+      - name: Archive Release unsigned (the same archive step release.sh runs, minus signing)
+        run: |
+          set -o pipefail
+          xcodebuild archive -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/MirrorMirror.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|warning:|ARCHIVE (SUCCEEDED|FAILED)" || true
+          grep -q "ARCHIVE SUCCEEDED" "$RUNNER_TEMP/archive.log"
+          PLIST="$RUNNER_TEMP/MirrorMirror.xcarchive/Products/Applications/MirrorMirror.app/Info.plist"
+          for key in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion MinimumOSVersion CFBundleIconName UIDeviceFamily; do
+            printf '%s = ' "$key"; /usr/libexec/PlistBuddy -c "Print :$key" "$PLIST" | tr '\n' ' '; echo
+          done
+          test -f "$RUNNER_TEMP/MirrorMirror.xcarchive/Products/Applications/MirrorMirror.app/PrivacyInfo.xcprivacy"
+
       - name: Inspect the app bundle
         run: |
           set -eo pipefail

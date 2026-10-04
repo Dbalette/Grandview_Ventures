@@ -5,6 +5,8 @@ local URL scheme (`mirror://app/`), opens the front camera inside a `WKWebView`,
 auto-renewing subscription through StoreKit 2. Free to download, three free readings, then
 **Mirror Mirror Premium at US$0.99 a month** (product id `com.grandviewventures.mirrormirror.monthly`).
 
+**Same route as Arizona Water Watch.** The project is set up the way Arizona Water Watch ships: Apple team `Y2HWD96TBZ`, automatic signing, built and uploaded from your Mac with Xcode. Double-click `Open in Xcode.command` to open it (like the Arizona one), or run `./release.sh` to archive and upload in one command, which is the same route as Xcode's Product > Archive > Distribute App > App Store Connect > Upload. Nothing in the Arizona repository can submit anything from the cloud (no scripts, no keys); its last commit records that its builds are uploaded from Xcode, and this app follows suit. Mirror Mirror gets its own App Store Connect record and bundle id, so the live Arizona Water Watch listing is untouched.
+
 What follows is everything between this folder and the "Submit for Review" button, in order. Steps
 marked **you** need your Apple ID, your Mac, or App Store Connect, which nobody else can do for you.
 
@@ -58,10 +60,11 @@ version, in the *In-App Purchases and Subscriptions* box on the version page (st
 
 ```bash
 git clone https://github.com/Dbalette/Grandview_Ventures.git
-cd Grandview_Ventures
-bash mirrormirror/ios/prepare.sh        # copies the web app into www/ and downloads the vision library + face model (about 40 MB, kept out of git)
-open mirrormirror/ios/MirrorMirror.xcodeproj
+cd Grandview_Ventures/mirrormirror/ios
+open "Open in Xcode.command"            # or: bash prepare.sh && open MirrorMirror.xcodeproj
 ```
+
+`prepare.sh` copies the web app into `www/` and downloads the vision library and face model (about 40 MB, kept out of git).
 
 In Xcode:
 
@@ -75,6 +78,8 @@ In Xcode:
 **What has been verified, and what has not.** On a macOS runner with Xcode 16.4 the project compiles with no Swift warnings, both Debug for the simulator and Release for iPhone hardware, and the app launched in an iPhone 17 Pro simulator on iOS 26: the page loaded from `mirror://app/` as a secure context with camera support, the bundled vision library and face model loaded with no network, and the Swift store bridge answered the page. What nobody has exercised yet, because it needs your phone and your Apple ID: the live camera on a real iPhone, a real or sandbox purchase, Restore, and the share sheet. Test those four on a device before you submit (the StoreKit test file lets you buy without being charged). If Xcode on your Mac complains about anything, paste me the error; the project file was written by hand, and Xcode 16.4 accepted it, but a different version might not.
 
 ## 4. Archive and upload (you, 5 minutes, or the GitHub Action)
+
+**One command:** `./release.sh` from `mirrormirror/ios` (use `./release.sh --ipa-only` to produce the .ipa without uploading). It needs the App Store Connect record from step 1 to exist first, and Xcode signed in with the Apple ID for team `Y2HWD96TBZ`. It has not been run on a Mac with your account, so if it stops on a signing message, use the Xcode route below, which is the one Arizona uses.
 
 **In Xcode:** set the device to *Any iOS Device (arm64)*, then *Product > Archive* > *Distribute App* > *App Store Connect* > *Upload*. Keep *Upload your app's symbols* and *Manage version and build number* ticked.
 
@@ -156,6 +161,7 @@ On the 1.0 version page:
 | `MirrorMirror/Info.plist` | camera purpose string, portrait only, no non-exempt encryption |
 | `MirrorMirror/MirrorMirror.storekit` | local StoreKit configuration for testing purchases without App Store Connect |
 | `MirrorMirror/www/` | the web app, copied by `prepare.sh`; `www/vendor/` (library + model) is downloaded by the same script and ignored by git |
+| `release.sh`, `Open in Xcode.command` | one-command archive and upload from a Mac; double-click launcher (the same pair of conveniences as the Arizona project) |
 | `prepare.sh` | run before building: syncs the web app and fetches the vision library, the face model and the MediaPipe licence notice |
 | `../licenses.html` | open-source notices (MediaPipe Apache-2.0, fonts OFL), shown in the app |
 | `ExportOptions.plist` | export settings used by the GitHub workflow |
