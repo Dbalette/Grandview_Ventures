@@ -84,8 +84,10 @@ jobs:
           grep -q "ARCHIVE SUCCEEDED" "$RUNNER_TEMP/archive.log"
           PLIST="$RUNNER_TEMP/MirrorMirror.xcarchive/Products/Applications/MirrorMirror.app/Info.plist"
           for key in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion MinimumOSVersion CFBundleIconName UIDeviceFamily; do
-            printf '%s = ' "$key"; /usr/libexec/PlistBuddy -c "Print :$key" "$PLIST" | tr '\n' ' '; echo
+            printf '%s = ' "$key"; { /usr/libexec/PlistBuddy -c "Print :$key" "$PLIST" 2>&1 || true; } | tr '\n' ' '; echo
           done
+          # Required by App Store Connect validation for apps that use an asset-catalog icon (Arizona Water Watch sets it the same way).
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIconName" "$PLIST" > /dev/null
           test -f "$RUNNER_TEMP/MirrorMirror.xcarchive/Products/Applications/MirrorMirror.app/PrivacyInfo.xcprivacy"
 
       - name: Inspect the app bundle
