@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Mirror Mirror on The Wall</title>
+<meta name="description" content="A magic mirror that measures your face against the golden ratio and shows you every line of the arithmetic."/>
+<meta name="theme-color" content="#6e1e2b"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Mirror Mirror"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Josefin+Sans:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="brand">
+  <div class="brand-rule" aria-hidden="true"></div>
+  <h1 class="brand-title">Mirror Mirror <span class="brand-small">on</span> The Wall</h1>
+  <p class="brand-tag">A magic mirror that answers in mathematics</p>
+  <div class="brand-rule" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+  <!-- ============ WELCOME ============ -->
+  <section id="view-welcome" class="view" aria-labelledby="welcome-heading">
+    <div class="mirror-frame mirror-frame--idle" aria-hidden="true">
+      <div class="mirror-glass">
+        <div class="mirror-phi">&phi;</div>
+        <div class="mirror-ratio">1.618&thinsp;033&thinsp;989</div>
+      </div>
+    </div>
+
+    <h2 id="welcome-heading" class="visually-hidden">Welcome</h2>
+    <p class="lede">The mirror finds <strong>478 points</strong> on your face, measures the distances between them, and compares the proportions with the <strong>golden ratio</strong>, the classical canons of the sculptors, and your own symmetry. Then it shows you every formula.</p>
+
+    <div class="actions">
+      <button id="btn-open" class="btn btn-primary" type="button">Open the mirror</button>
+      <label class="btn btn-secondary" for="file-input">Use a photo instead</label>
+      <input id="file-input" type="file" accept="image/*" hidden/>
+    </div>
+
+    <p id="model-status" class="status" role="status" aria-live="polite">Polishing the glass&hellip;</p>
+    <p id="plan-status" class="plan-status"></p>
+
+    <aside class="card tips" aria-labelledby="tips-heading">
+      <h3 id="tips-heading">For a fair reading</h3>
+      <ul>
+        <li>Face the mirror straight on, chin level, eyes at the lens.</li>
+        <li>Hair off the forehead; glasses off if you can.</li>
+        <li>Soft, even light from the front. No strong side light.</li>
+        <li>Neutral expression, lips gently closed.</li>
+        <li>Hold the phone upright at arm's length.</li>
+      </ul>
+    </aside>
+
+    <p class="fineprint">Everything happens on your phone. No photograph, measurement or score ever leaves it. <a href="privacy.html">Privacy</a> &middot; <a href="methodology.html">How the math works</a></p>
+  </section>
+
+  <!-- ============ LIVE MIRROR ============ -->
+  <section id="view-mirror" class="view" hidden aria-labelledby="mirror-heading">
+    <h2 id="mirror-heading" class="visually-hidden">Live mirror</h2>
+    <div class="mirror-frame" id="mirror-frame">
+      <div class="mirror-glass">
+        <video id="video" playsinline muted autoplay></video>
+        <canvas id="overlay" aria-hidden="true"></canvas>
+        <div id="countdown" class="countdown" aria-hidden="true"></div>
+      </div>
+    </div>
+    <p id="guidance" class="guidance" role="status" aria-live="polite">Looking for a face&hellip;</p>
+    <div class="pose-dots" aria-hidden="true">
+      <span id="dot-face" class="dot" title="Face found"></span>
+      <span id="dot-yaw" class="dot" title="Facing straight"></span>
+      <span id="dot-pitch" class="dot" title="Chin level"></span>
+      <span id="dot-roll" class="dot" title="Head upright"></span>
+      <span id="dot-size" class="dot" title="Close enough"></span>
+    </div>
+    <div class="actions">
+      <button id="btn-consult" class="btn btn-primary" type="button" disabled>Consult the mirror</button>
+      <button id="btn-flip" class="btn btn-ghost" type="button" aria-label="Switch camera">Switch camera</button>
+      <button id="btn-cancel" class="btn btn-ghost" type="button">Back</button>
+    </div>
+  </section>
+
+  <!-- ============ VERDICT ============ -->
+  <section id="view-verdict" class="view" hidden aria-labelledby="verdict-heading">
+    <h2 id="verdict-heading" class="section-title">The mirror has spoken</h2>
+    <div id="verdict-root"></div>
+    <div class="actions">
+      <button id="btn-again" class="btn btn-primary" type="button">Look again</button>
+      <button id="btn-save" class="btn btn-secondary" type="button">Save the card</button>
+    </div>
+    <p class="fineprint"><a href="methodology.html">How the math works</a> &middot; <a href="privacy.html">Privacy</a></p>
+  </section>
+
+  <!-- ============ PAYWALL ============ -->
+  <section id="view-paywall" class="view" hidden aria-labelledby="paywall-heading">
+    <div id="paywall-root"></div>
+  </section>
+
+  <!-- ============ ERROR ============ -->
+  <section id="view-error" class="view" hidden aria-labelledby="error-heading">
+    <h2 id="error-heading" class="section-title">The mirror is fogged</h2>
+    <p id="error-text" class="lede"></p>
+    <div class="actions">
+      <button id="btn-error-back" class="btn btn-primary" type="button">Back</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>&phi; = (1 + &radic;5) / 2 &asymp; 1.618. A hypothesis about beauty since Euclid, a parlor game with good arithmetic today.</p>
+</footer>
+
+<canvas id="work" hidden></canvas>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

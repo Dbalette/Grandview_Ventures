@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mirror Mirror on The Wall - How the math works</title>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml"/>
+</head>
+<body>
+<header class="brand">
+  <div class="brand-rule" aria-hidden="true"></div>
+  <h1 class="brand-title">Mirror Mirror <span class="brand-small">on</span> The Wall</h1>
+  <p class="brand-tag">How the math works</p>
+  <div class="brand-rule" aria-hidden="true"></div>
+</header>
+<main class="prose">
+<a class="back" href="index.html">&larr; Back to the mirror</a>
+
+<p class="lede" style="text-align:left">The mirror does four things: it finds points on your face, it measures distances between them, it compares the ratios of those distances with a handful of published ideals, and it turns each comparison into a number with one rule. This page gives every point, every ratio, every ideal and every rule, with the sources, and ends with what the science actually says.</p>
+
+<h2>1. The points</h2>
+<p>The face is read by Google's <strong>MediaPipe Face Landmarker</strong>, a neural network that runs in the browser and returns 478 landmarks (468 on the face plus 10 on the irises) for each video frame, with their positions in the image and a 4&times;4 transformation matrix for the head pose. The mirror converts the landmarks into pixel coordinates (multiplying by the frame's width and height, so a 3:4 frame does not squash horizontal distances), takes about a second of frames and keeps the median of each point, which steadies the reading against jitter.</p>
+<div class="table-scroll"><table>
+<tr><th>Anatomical point</th><th>Landmark</th><th>Note</th></tr>
+<tr><td>Top of forehead (mesh edge)</td><td>10</td><td>The mesh has no hairline point; 10 sits on the upper forehead, about 13 mm below an average hairline. The mirror searches for the true hairline (section 2).</td></tr>
+<tr><td>Glabella (brow line)</td><td>9</td><td>Between the eyebrows.</td></tr>
+<tr><td>Nasion (bridge)</td><td>168</td><td>Deepest point between the eyes.</td></tr>
+<tr><td>Nose tip</td><td>1</td><td></td></tr>
+<tr><td>Subnasale (base of nose)</td><td>2</td><td>Where the columella meets the lip.</td></tr>
+<tr><td>Nostril edges (alare)</td><td>129 / 358</td><td>The widest points of the nostril wings.</td></tr>
+<tr><td>Mouth corners (cheilion)</td><td>61 / 291</td><td></td></tr>
+<tr><td>Lip line (stomion)</td><td>midpoint of 13 and 14</td><td>Where the lips meet.</td></tr>
+<tr><td>Chin (menton)</td><td>152</td><td>Lowest point of the chin.</td></tr>
+<tr><td>Face width (zygion)</td><td>234 / 454</td><td>The edges of the face at eye level, just in front of the ears.</td></tr>
+<tr><td>Jaw angles (gonion)</td><td>172 / 397</td><td>Used for symmetry.</td></tr>
+<tr><td>Eye corners</td><td>33, 133 (right) / 362, 263 (left)</td><td>Outer and inner corners. MediaPipe's "right" is your right.</td></tr>
+<tr><td>Pupils</td><td>468 / 473</td><td>Iris centres; the iris rings 469&ndash;472 and 474&ndash;477 give the iris diameter.</td></tr>
+<tr><td>Eyebrows</td><td>107, 105, 70 / 336, 334, 300</td><td>Head, arch, tail. Used for symmetry.</td></tr>
+</table></div>
+<p>Vertical distances (eyes to lips, lips to chin and so on) are measured along the <strong>facial axis</strong>, a straight line fitted by least squares through 24 midline landmarks from the forehead to the chin, so a slightly tilted head does not stretch them. Horizontal distances are straight-line distances between the two landmarks.</p>
+
+<h2>2. The hairline, millimetres, and other measurement details</h2>
+<p><strong>Hairline.</strong> Because landmark 10 stops short of the hairline, the mirror samples the colour of the forehead skin, then walks up the facial axis from landmark 10 in three parallel lanes, comparing each strip of pixels with the skin (luminance and chromaticity). Where the colour departs from skin for six consecutive pixels the hairline is declared; the median of the lanes is used; if fewer than two lanes agree, or no change is found within 26% of the face length (which keeps a bald head from measuring to the crown), the mesh point is used and the verdict says so. The note under your score tells you which happened.</p>
+<p><strong>Millimetres.</strong> The horizontal diameter of the adult iris is almost the same in everyone: 11.7 &plusmn; 0.5 mm. The mirror measures your iris in pixels and uses that to label every distance in approximate millimetres. Ratios do not depend on this; it is there so the numbers mean something.</p>
+<p><strong>Pose and expression.</strong> Yaw, pitch and roll come from the model's head-pose matrix; the live view asks you to turn, lift or level until all three are within 7&ndash;8 degrees, and warns in the verdict when they were not. A smile, an open jaw or raised brows are read from the model's blendshape coefficients and flagged, because a smile widens the mouth by a third and the nostrils by a tenth.</p>
+<p><strong>Mirroring.</strong> The preview is mirrored like a looking glass, but the arithmetic is done on the unmirrored frame, so "right" and "left" in the symmetry panel are your own right and left.</p>
+
+<h2>3. The seven golden ratios</h2>
+<p>&phi; = (1 + &radic;5) / 2 = 1.618&thinsp;033&thinsp;989. The claim, which runs from Pacioli's <em>De divina proportione</em> (1509) through Adolf Zeising (1854) to Robert Ricketts's orthodontic papers (1982) and Stephen Marquardt's "Phi mask" (patented 1998), is that beautiful faces are built on this number. The seven ratios below are the ones that recur across those sources and that a 2-D photograph can measure without a hairline-to-crown measurement.</p>
+<div class="table-scroll"><table>
+<tr><th>Ratio</th><th>Numerator</th><th>Denominator</th><th>Ideal</th><th>Source</th></tr>
+<tr><td>Face length &divide; face width</td><td>hairline (or mesh top) &rarr; chin</td><td>face edge &rarr; face edge at eye level</td><td>&phi;</td><td>Marquardt; De Silva's "face shape"; every popular list</td></tr>
+<tr><td>Mouth width &divide; nose width</td><td>mouth corner &rarr; mouth corner</td><td>nostril edge &rarr; nostril edge</td><td>&phi;</td><td>Ricketts 1982 (horizontal golden progression)</td></tr>
+<tr><td>Outer eye span &divide; mouth width</td><td>outer eye corner &rarr; outer eye corner</td><td>mouth width</td><td>&phi;</td><td>Ricketts 1982</td></tr>
+<tr><td>Lips to chin &divide; nose base to lips</td><td>lip line &rarr; chin</td><td>nostril level &rarr; lip line</td><td>&phi;</td><td>Ricketts 1982 (stomion&ndash;menton : ala&ndash;stomion)</td></tr>
+<tr><td>Nose tip to chin &divide; lips to chin</td><td>nose tip &rarr; chin</td><td>lip line &rarr; chin</td><td>&phi;</td><td>PhiMatrix lists; De Silva "nose to chin"</td></tr>
+<tr><td>Eyes to lips &divide; lips to chin</td><td>pupil level &rarr; lip line</td><td>lip line &rarr; chin</td><td>&phi;</td><td>Ricketts 1982 (stomion&ndash;eye : stomion&ndash;menton)</td></tr>
+<tr><td>Nose length &divide; nose width</td><td>bridge &rarr; base of nose</td><td>nostril edge &rarr; nostril edge</td><td>&phi;</td><td>Popular lists; De Silva "nose width and length"</td></tr>
+</table></div>
+
+<h2>4. Symmetry</h2>
+<p>For each of 13 pairs of matching points (eye corners, pupils, eyelids, three points on each brow, nostrils, mouth corners, cheekbones, jaw angles, cheeks) the mirror measures the perpendicular distance of the right and left point from the facial axis, <em>R</em> and <em>L</em>, and their positions along it. Two indices follow:</p>
+<pre>horizontal asymmetry = |R &minus; L| &divide; (R + L) &times; 100 %
+vertical tilt        = |along_R &minus; along_L| &divide; (R + L) &times; 100 %</pre>
+<p>The pair's index is the mean of the two; a fourteenth row compares the widths of the two eyes. The face's asymmetry index is the mean over all rows. This is the normalised 2-D asymmetry index used in the orthodontic literature; Farkas and Cheung (1981) found that right-left differences under 3 mm, or 3%, are invisible to an observer. The symmetry score is <code>100 &minus; 2.5 &times; index</code>, so a face at the 3% threshold scores 92.5 and a visibly asymmetric 10% face scores 75.</p>
+
+<h2>5. The scoring rule</h2>
+<pre>deviation = |measured &minus; ideal| &divide; ideal
+score     = 100 &times; (1 &minus; deviation), floored at 0
+
+golden    = mean of the seven ratio scores
+symmetry  = 100 &minus; 2.5 &times; asymmetry %
+headline  = 0.8 &times; golden + 0.2 &times; symmetry</pre>
+<p>In words: every percent your ratio sits away from the ideal costs one point. The rule is the same for every ratio, there are no hidden weights, and the classical canons and modern ratios below are shown as second opinions and do not move the headline. The tiers are plain thresholds: 95 and above, 90, 85, 80, 70.</p>
+<p>The rule is deliberately the simplest one that reproduces the kind of percentages the press quotes from Dr Julian De Silva's face mapping (Bella Hadid 94.35%, Jodie Comer 94.52%, Marilyn Monroe 89.41%). His method and weights are unpublished, so his numbers are not the same instrument as the mirror's; they are shown in the comparison panel for flavour and labelled as such.</p>
+
+<h2>6. Second opinion: the classical canons</h2>
+<p>These are the sculptors' rules of thumb, codified by the Renaissance from Greek and Roman practice, and tested in living faces by the anthropometrist Leslie Farkas. Farkas, Hreczko, Kolar and Munro (1985) measured 153 young North American adults against nine canons and found most of them rarely true: the three facial thirds were equal in essentially nobody; "the nose is as wide as the space between the eyes" held in 40%; "the nose is a quarter of the face's width" in 37%; and most women's mouths were wider than the canon's one and a half noses.</p>
+<div class="table-scroll"><table>
+<tr><th>Canon</th><th>Measured as</th><th>Ideal</th></tr>
+<tr><td>Equal thirds</td><td>middle third (brow line &rarr; nose base) &divide; lower third (nose base &rarr; chin); the top third is shown but reaches only to the mesh edge or found hairline</td><td>1</td></tr>
+<tr><td>Facial fifths</td><td>outer eye span &divide; face width (the two eyes and the gap between them fill the middle three fifths)</td><td>0.6</td></tr>
+<tr><td>Orbitonasal</td><td>nose width &divide; distance between the inner eye corners</td><td>1</td></tr>
+<tr><td>Naso-oral</td><td>mouth width &divide; nose width</td><td>1.5</td></tr>
+<tr><td>Nasofacial</td><td>face width &divide; nose width</td><td>4</td></tr>
+<tr><td>Lower face</td><td>lips to chin &divide; nose base to lip line (the upper lip is a third of the lower face)</td><td>2 (Powell &amp; Humphreys 1984)</td></tr>
+</table></div>
+
+<h2>7. Second opinion: modern science</h2>
+<p>Pallett, Link and Lee (<em>Vision Research</em>, 2010) did what the ancients never did: they moved the eyes and mouth around on otherwise identical photographs and asked people which face they preferred. The favourite had the mouth 36% of the face length (hairline to chin) below the eyes, and the pupils 46% of the face width (between the inner edges of the ears) apart. Those are not golden numbers; they are the average female face. The mirror measures both ratios with the same landmarks (the face width between landmarks 234 and 454 is, conveniently, the inner edges of the ears).</p>
+
+<h2>8. The average face, from calipers</h2>
+<p>To give the score a yardstick, the mirror pushes the published average face through exactly the same formulas. The numbers are Leslie Farkas's direct caliper measurements of North American White young adults aged 18&ndash;25 (<em>Anthropometry of the Head and Face</em>, 1994; Farkas et al., <em>J Craniofac Surg</em> 2005), in millimetres, as collated from secondary reports:</p>
+<div class="table-scroll"><table>
+<tr><th>Measurement (Farkas code)</th><th>Women (n = 200)</th><th>Men (n = 109)</th></tr>
+<tr><td>Hairline to chin (tr&ndash;gn)</td><td>173.3</td><td>187.2</td></tr>
+<tr><td>Nasion to chin (n&ndash;gn)</td><td>111.8</td><td>121.3</td></tr>
+<tr><td>Nose length (n&ndash;sn)</td><td>48.9</td><td>53.0</td></tr>
+<tr><td>Lower face (sn&ndash;gn)</td><td>65.5</td><td>71.9</td></tr>
+<tr><td>Upper lip (sn&ndash;sto)</td><td>20.1</td><td>22.3</td></tr>
+<tr><td>Lip line to chin (sto&ndash;gn)</td><td>43.4</td><td>50.7</td></tr>
+<tr><td>Face width (zy&ndash;zy)</td><td>129.9</td><td>137.1</td></tr>
+<tr><td>Jaw width (go&ndash;go)</td><td>91.1</td><td>97.1</td></tr>
+<tr><td>Outer eye span (ex&ndash;ex)</td><td>86.8</td><td>89.4</td></tr>
+<tr><td>Inner eye gap (en&ndash;en)</td><td>31.6</td><td>32.9</td></tr>
+<tr><td>Eye width (ex&ndash;en)</td><td>30.7</td><td>31.3</td></tr>
+<tr><td>Pupil distance (pp)</td><td>61.0</td><td>64.0</td></tr>
+<tr><td>Nose width (al&ndash;al)</td><td>31.4</td><td>34.7 (approx.)</td></tr>
+<tr><td>Mouth width (ch&ndash;ch)</td><td>50.2</td><td>53.3</td></tr>
+</table></div>
+<p>Four vertical offsets the tables do not give (brow line 15 mm above the nasion, pupils 5 mm below it, nostril base 12 mm and nose tip 9 mm above the subnasale) are taken from the geometry of the face mesh and are documented in <code>js/norms.js</code>. Under the mirror's rules the average woman scores about <strong>92</strong> and the average man about <strong>93</strong>, with 2% asymmetry. Calipers and cameras do not see quite the same face: the camera's nostril-edge points run wider than caliper alare, the mesh's eye corners hug the visible eyelid opening (about a tenth shorter than caliper eye width), and the mesh top sits under the hairline unless the hairline search succeeds. Expect a camera reading of an average face to come out a few points under the caliper figure.</p>
+
+<h2>9. Published celebrity scores</h2>
+<p>The comparison panel also lists scores that Dr Julian De Silva (Centre for Advanced Facial Cosmetic and Plastic Surgery, London) released to the press from his 12-marker "Golden Ratio of Beauty Phi" mapping: Emma Stone 94.72 (2025), Jodie Comer 94.52 and Zendaya 94.37 (2022), Bella Hadid 94.35 (2019), Reg&eacute;-Jean Page 93.65 and Chris Hemsworth 93.53 (2021), Beyonc&eacute; 92.44 (2019), Robert Pattinson 92.15 (2020), George Clooney 91.86 (2017), Amber Heard 91.85 (2016), Henry Cavill 91.64 (2020), Kate Moss 91.06 (2016), Scarlett Johansson 90.91 (2019), Brad Pitt 90.51 (2017), Marilyn Monroe 89.41 (2016), Ryan Gosling 87.48 (2020). The same person has been given different numbers in different years (Clooney 91.86 then 89.91), which tells you how much the photograph matters.</p>
+
+<h2>10. Known limitations, honestly</h2>
+<ul>
+  <li><strong>The camera lens.</strong> A phone held at arm's length enlarges whatever is closest: the nose and the mouth. A photo from a metre or more away, or a longer lens, is truer. The mirror cannot correct for this.</li>
+  <li><strong>Pose.</strong> Five degrees of yaw shifts the nose relative to the cheeks and manufactures asymmetry. Hence the coaching, and the warning when it was ignored.</li>
+  <li><strong>Expression.</strong> Smiles, pursed lips, raised brows and open jaws move the lower face by centimetres.</li>
+  <li><strong>Landmark bias.</strong> The mesh's nostril points read wide, its eye corners read narrow, and its top point is below the hairline (section 8). These biases are the same for everyone, so they do not favour anyone, but they do mean that a camera reading and a caliper reading of the same face differ.</li>
+  <li><strong>Repeatability.</strong> Three readings in the same light typically agree to within about two points. Keep the middle one.</li>
+  <li><strong>Hair and hats.</strong> Bangs, a hat or a very high forehead confuse the hairline search; the verdict says when it fell back to the mesh point.</li>
+</ul>
+
+<h2>11. What the science says</h2>
+<p>The mirror reports the golden ratio because that is what it was asked to measure, and because it is an old, elegant and widely quoted idea. The evidence that it predicts beauty is thin:</p>
+<ul>
+  <li>Holland (2008, <em>Aesthetic Plastic Surgery</em>) fitted Marquardt's Phi mask to real faces and found it describes a masculinised white fashion model better than what most people find attractive, and poorly describes East Asian and sub-Saharan African faces.</li>
+  <li>Kiekens et al. (2008, <em>Am J Orthod Dentofacial Orthop</em>) tested 19 Ricketts golden proportions on 64 adolescents rated by 76 laypeople: four correlated with attractiveness, explaining 16% of the variance.</li>
+  <li>Pallett, Link and Lee (2010) found the preferred proportions are the population average, not &phi;.</li>
+  <li>Alam et al. (2015, <em>PLoS ONE</em>) found only 17% of 286 Malaysian subjects conformed to the golden ratio; Burusapat et al. (2019) found 12 of 16 golden ratios differed significantly in Miss Universe contestants.</li>
+  <li>Two systematic reviews in 2022 (<em>J Prosthet Dent</em>; <em>J Indian Orthod Soc</em>) and a 2024 review (<em>Maxillofac Plast Reconstr Surg</em>) conclude there is no convincing evidence linking the golden ratio to facial beauty across ethnicities.</li>
+  <li>What does predict attractiveness in controlled studies: averageness, symmetry (modestly), sexual dimorphism, skin homogeneity, and expression. Schmid, Marx and Samal (2008, <em>Pattern Recognition</em>) found the neoclassical canons and some golden ratios explain a share of ratings, symmetry rather less than expected.</li>
+</ul>
+<blockquote>So: a parlour game with honest arithmetic. The number is real, the measurements are real, the ideal is a hypothesis, and the face in the glass is the thing itself.</blockquote>
+
+<h2>12. Sources</h2>
+<ul>
+  <li>MediaPipe Face Landmarker: <a href="https://github.com/google-ai-edge/mediapipe">github.com/google-ai-edge/mediapipe</a> (canonical face model, landmark connections, face geometry module; iris diameter in docs/solutions/iris.md).</li>
+  <li>Ricketts RM. The biologic significance of the divine proportion and Fibonacci series. <em>Am J Orthod</em> 1982;81(5):351&ndash;370.</li>
+  <li>Marquardt SR. US patent 5,867,588 (1999); Kim YH. Easy facial analysis using the facial golden mask. <em>J Craniofac Surg</em> 2007;18(3):643&ndash;649.</li>
+  <li>Farkas LG, Hreczko TA, Kolar JC, Munro IR. Vertical and horizontal proportions of the face in young adult North American Caucasians: revision of neoclassical canons. <em>Plast Reconstr Surg</em> 1985;75(3):328&ndash;337.</li>
+  <li>Farkas LG. <em>Anthropometry of the Head and Face</em>, 2nd ed. Raven Press, 1994; Farkas LG et al. International anthropometric study of facial morphology in various ethnic groups/races. <em>J Craniofac Surg</em> 2005;16(4):615&ndash;646.</li>
+  <li>Farkas LG, Cheung G. Facial asymmetry in healthy North American Caucasians. <em>Angle Orthod</em> 1981;51(1):70&ndash;77.</li>
+  <li>Powell N, Humphreys B. <em>Proportions of the Aesthetic Face</em>. Thieme-Stratton, 1984.</li>
+  <li>Pallett PM, Link S, Lee K. New "golden" ratios for facial beauty. <em>Vision Research</em> 2010;50(2):149&ndash;154.</li>
+  <li>Schmid K, Marx D, Samal A. Computation of a face attractiveness index based on neoclassical canons, symmetry, and golden ratios. <em>Pattern Recognition</em> 2008;41(8):2710&ndash;2717.</li>
+  <li>Grammer K, Thornhill R. Human facial attractiveness and sexual selection: the role of symmetry and averageness. <em>J Comp Psychol</em> 1994;108(3):233&ndash;242.</li>
+  <li>Holland E. Marquardt's Phi mask: pitfalls of relying on fashion models and the golden ratio to describe a beautiful face. <em>Aesthetic Plast Surg</em> 2008;32(2):200&ndash;208.</li>
+  <li>Kiekens RMA et al. Putative golden proportions as predictors of facial esthetics in adolescents. <em>Am J Orthod Dentofacial Orthop</em> 2008;134(4):480&ndash;483.</li>
+  <li>Alam MK et al. Multiracial facial golden ratio and evaluation of facial appearance. <em>PLoS ONE</em> 2015;10(11):e0142914.</li>
+  <li>Burusapat C, Lekdaeng P. What is the most beautiful facial proportion in the 21st century? <em>Plast Reconstr Surg Glob Open</em> 2019;7(2):e2044.</li>
+  <li>De Silva J. Press releases 2016&ndash;2025 as reported by CNN, ITV, Forbes and others ("Golden Ratio of Beauty Phi").</li>
+</ul>
+</main>
+<footer class="foot"><p>&phi; = (1 + &radic;5) / 2 &asymp; 1.618.</p></footer>
+</body>
+</html>
