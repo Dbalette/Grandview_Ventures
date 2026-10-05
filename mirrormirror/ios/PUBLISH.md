@@ -110,11 +110,12 @@ there is, the Manage questionnaire answer is "None of the algorithms mentioned a
 
 ## Prompt for a session on your computer
 
-Open Claude on your Mac in your clone of Grandview_Ventures (the desktop app, or `claude remote-control` in a terminal there), check out
+Open the Claude desktop app on your Mac and start a local session in your clone of Grandview_Ventures (the built-in browser pane, where you sign in, exists there and not in a cloud session; `claude remote-control` in a terminal in that folder also works), check out
 `claude/affectionate-heisenberg-ydtblc`, and send:
 
 > Publish Mirror Mirror to App Store review. Follow mirrormirror/ios/PUBLISH.md, and for the how use section 12 of docs/CLONE_PLAYBOOK.md
 > in the ArizonaExplained repo on branch session/news-headline-and-chart-fixes. Do steps 0 to 12 in order. Use Xcode on this Mac for the
-> upload and my real Chrome for App Store Connect. Ask me before each irreversible step: the bundle id, pricing, the public push of the
-> support pages, and Submit for Review. Reload and re-read every App Store Connect field after saving. If you reach a login or a
-> decision, stop and tell me.
+> upload and the built-in browser for App Store Connect. Open App Store Connect and tell me when to sign in. I will sign in myself, so
+> never type my Apple ID or password. Ask me before each irreversible step: the bundle id, pricing, the public push of the support
+> pages, and Submit for Review. Reload and re-read every App Store Connect field after saving. If you reach a login or a decision,
+> stop and tell me.
