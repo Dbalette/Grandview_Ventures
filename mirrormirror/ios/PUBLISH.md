@@ -5,9 +5,37 @@ playbook: the ArizonaExplained repository, branch `session/news-headline-and-cha
 `main` in that repository still has the older playbook without section 12. The app is free to download with three free readings, then
 **Mirror Mirror Premium at US$0.99 a month** (product id `com.grandviewventures.mirrormirror.monthly`).
 
-**Why this needs your computer.** The playbook is explicit that the web UI never carries the binary, and that the upload needs a live
-Apple ID session inside Xcode on a Mac. App Store Connect records, metadata, screenshots and submission go through your signed-in
-browser. A cloud session has neither, so steps 1 to 12 below run in a session on your Mac. The prompt for it is at the end.
+**Two routes.** The Mac route (steps 0 to 12 below) follows the playbook: Xcode on your Mac does the upload and a signed-in browser does
+App Store Connect. The cloud route needs no Mac and no Xcode login: GitHub Actions authenticates with an App Store Connect API key.
+Apple's API reference has a Build Upload resource for the binary and lists no create-app call, so creating the app record and the App
+Privacy Publish click stay in the browser, and the rest can go through the API.
+
+## Cloud route (no Mac)
+
+**One-time setup, about two minutes.** In this repository, Settings, Secrets and variables, Actions, add three repository secrets:
+
+| Secret | Value |
+|---|---|
+| `ASC_KEY_ID` | the key id of an **Admin** API key (cloud signing needs Admin) |
+| `ASC_ISSUER_ID` | the issuer id shown on the same App Store Connect page |
+| `ASC_KEY_P8` | the text of that key's `AuthKey_<id>.p8` file, pasted as it is (its base64 also works) |
+
+On your Mac the `.p8` files live in `~/.appstoreconnect/private_keys`, and `docs/tools/asc_jwt.py` in the Arizona repository names the
+key ids and the issuer id. Never paste any of this into a chat. The workflows read the secrets only when you start them by hand, a
+push never uses them, and forks never receive them. Revoke the key in App Store Connect after launch if you want it gone.
+
+**Then, from the Actions tab:**
+
+1. `Mirror Mirror - App Store Connect API`, command `preflight`. Read-only: proves the key works and shows what already exists.
+2. The same workflow, command `register-bundle-id`. Registers the bundle id so the New App dropdown lists it.
+3. In the App Store Connect website, create the app record (step 3 below). This is the one step with no API.
+4. `Mirror Mirror - upload to App Store Connect`. Archives on a macOS runner, signs with Xcode's cloud signing and uploads. If Xcode's
+   upload refuses the key, the fallback is Apple's Build Upload API (`POST /v1/buildUploads`).
+5. Metadata, subscription, screenshots, pricing, age rating and submission follow the order below. App Privacy (Save, then Publish) is
+   browser only.
+
+Written so far: `preflight`, `register-bundle-id` and the upload workflow. The other commands are added to `tools/asc.py` as each step
+is reached. The Actions log of a public repository is public, so the script prints counts and states, never names, tokens or contacts.
 
 ## What is already verified
 
@@ -99,6 +127,8 @@ there is, the Manage questionnaire answer is "None of the algorithms mentioned a
 | Path | Purpose |
 |---|---|
 | `release.sh`, `Open in Xcode.command` | one-command archive and upload from a Mac; double-click launcher |
+| `tools/asc.py` | App Store Connect API helper for the cloud route (`preflight`, `register-bundle-id`, offline `selftest`) |
+| `../../.github/workflows/mirrormirror-asc.yml`, `mirrormirror-testflight.yml` | the cloud route: API commands on Ubuntu; archive, cloud-sign and upload on macOS |
 | `tools/check_icon.py` | numeric icon check: 1024 by 1024, opaque, nothing but background where the iOS mask clips |
 | `tools/dry_run_release.sh` | dry run of `release.sh` with stand-in tools (CI runs it with the system bash) |
 | `store/*.txt`, `store/validate_store_text.py` | the App Store Connect text and its validator |

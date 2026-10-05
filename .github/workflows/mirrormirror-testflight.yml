@@ -1,13 +1,9 @@
-# Builds the Mirror Mirror iOS app on a macOS runner and uploads it to App Store Connect (TestFlight).
-# Run it by hand from the Actions tab once these repository secrets exist:
-#   ASC_KEY_ID            App Store Connect API key id            (App Store Connect > Users and Access > Integrations > App Store Connect API)
-#   ASC_ISSUER_ID         the issuer id shown on the same page
-#   ASC_KEY_P8_BASE64     the downloaded AuthKey_XXXX.p8, base64-encoded   (base64 -i AuthKey_XXXX.p8 | pbcopy)
-#   APPLE_TEAM_ID         your 10-character team id
-#   IOS_DIST_P12_BASE64   an Apple Distribution certificate exported from Keychain Access as .p12, base64-encoded
-#   IOS_DIST_P12_PASSWORD the password you gave that .p12
-# Submission to App Review itself is done in App Store Connect after the build has processed (see mirrormirror/ios/PUBLISH.md).
-name: Mirror Mirror - upload to TestFlight
+# Builds the Mirror Mirror iOS app on a macOS runner, signs it with Xcode's cloud signing and uploads it to App Store Connect.
+# No Mac, no Xcode login and no certificate files: it authenticates with an App Store Connect API key.
+# Needs the same three repository secrets as mirrormirror-asc.yml (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8). Cloud signing needs
+# an Admin key. Order: run mirrormirror-asc.yml (preflight, register-bundle-id), create the app record in the App Store Connect
+# website, then run this. Submission to App Review is a separate step; see mirrormirror/ios/PUBLISH.md.
+name: Mirror Mirror - upload to App Store Connect
 
 on:
   workflow_dispatch:
@@ -17,6 +13,13 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
+concurrency:
+  group: mirrormirror-upload
+  cancel-in-progress: false
+
 jobs:
   archive-and-upload:
     runs-on: macos-15
@@ -24,6 +27,8 @@ jobs:
     env:
       PROJECT: mirrormirror/ios/MirrorMirror.xcodeproj
       SCHEME: MirrorMirror
+      BUILD_NUMBER_INPUT: ${{ github.event.inputs.build_number }}
+      RUN_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,40 +41,39 @@ jobs:
       - name: Install the App Store Connect API key
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
-          mkdir -p ~/private_keys
-          echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/private_keys/AuthKey_${ASC_KEY_ID}.p8
-          echo "ASC_KEY_PATH=$HOME/private_keys/AuthKey_${ASC_KEY_ID}.p8" >> "$GITHUB_ENV"
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            if [ -z "${!name}" ]; then
+              echo "Repository secret $name is not set. See the Cloud route in mirrormirror/ios/PUBLISH.md."
+              exit 2
+            fi
+          done
+          KEY="$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
+          if printf '%s' "$ASC_KEY_P8" | grep -q 'BEGIN'; then
+            printf '%s\n' "$ASC_KEY_P8" > "$KEY"
+          else
+            printf '%s' "$ASC_KEY_P8" | base64 --decode > "$KEY" 2>/dev/null || true
+          fi
+          chmod 600 "$KEY"
+          if ! openssl pkey -in "$KEY" -noout 2>/dev/null; then
+            echo "ASC_KEY_P8 is not a valid .p8 private key."
+            exit 2
+          fi
+          echo "ASC_KEY_PATH=$KEY" >> "$GITHUB_ENV"
 
-      - name: Install the distribution certificate in a temporary keychain
+      - name: Archive with cloud signing
         env:
-          IOS_DIST_P12_BASE64: ${{ secrets.IOS_DIST_P12_BASE64 }}
-          IOS_DIST_P12_PASSWORD: ${{ secrets.IOS_DIST_P12_PASSWORD }}
-        run: |
-          KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
-          KEYCHAIN_PASSWORD="$(uuidgen)"
-          echo "$IOS_DIST_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security import "$RUNNER_TEMP/dist.p12" -P "$IOS_DIST_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security list-keychain -d user -s "$KEYCHAIN" login.keychain-db
-
-      - name: Archive
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          BUILD_NUMBER="${{ github.event.inputs.build_number }}"
-          if [ -z "$BUILD_NUMBER" ]; then BUILD_NUMBER="${{ github.run_number }}"; fi
+          BUILD_NUMBER="${BUILD_NUMBER_INPUT:-$RUN_NUMBER}"
           xcodebuild archive \
             -project "$PROJECT" -scheme "$SCHEME" -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath "$RUNNER_TEMP/MirrorMirror.xcarchive" \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
@@ -77,11 +81,9 @@ jobs:
 
       - name: Export and upload to App Store Connect
         env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          /usr/libexec/PlistBuddy -c "Add :teamID string $APPLE_TEAM_ID" mirrormirror/ios/ExportOptions.plist || true
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/MirrorMirror.xcarchive" \
             -exportOptionsPlist mirrormirror/ios/ExportOptions.plist \
@@ -90,4 +92,16 @@ jobs:
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
-          echo "Uploaded. Watch App Store Connect > TestFlight for processing."
+          echo "Uploaded. The build shows under TestFlight in App Store Connect once it has processed."
+
+      - name: Distribution logs (only if a step failed)
+        if: failure()
+        run: |
+          for dir in "$TMPDIR"/*.xcdistributionlogs "$RUNNER_TEMP/export"; do
+            [ -d "$dir" ] || continue
+            for f in "$dir"/*.log; do
+              [ -f "$f" ] || continue
+              echo "=== $(basename "$f") (last 80 lines) ==="
+              tail -n 80 "$f"
+            done
+          done

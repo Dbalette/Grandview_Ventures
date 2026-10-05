@@ -1,0 +1,54 @@
+# Talks to App Store Connect with an API key, so no Mac and no Xcode login are needed. Run it by hand from the Actions tab.
+# Needs three repository secrets (Settings > Secrets and variables > Actions): ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8.
+# preflight is read-only; register-bundle-id is the only write. The log of a public repository is public, so the script prints
+# counts and states only. A push that touches this file or the script runs the offline self test and nothing else.
+name: Mirror Mirror - App Store Connect API
+
+on:
+  push:
+    paths:
+      - ".github/workflows/mirrormirror-asc.yml"
+      - "mirrormirror/ios/tools/asc.py"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "What to run"
+        required: true
+        default: preflight
+        type: choice
+        options:
+          - preflight
+          - register-bundle-id
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirrormirror-asc
+  cancel-in-progress: false
+
+jobs:
+  asc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyJWT
+        run: python -m pip install --quiet "pyjwt[crypto]>=2.8,<3"
+
+      - name: Self test (offline, no secrets)
+        run: python mirrormirror/ios/tools/asc.py selftest
+
+      - name: Run the command
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          COMMAND: ${{ inputs.command }}
+        run: python mirrormirror/ios/tools/asc.py "$COMMAND"
