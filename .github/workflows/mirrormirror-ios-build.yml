@@ -74,6 +74,19 @@ jobs:
           bash -n mirrormirror/ios/release.sh
           bash -n mirrormirror/ios/prepare.sh
           plutil -lint mirrormirror/ios/ExportOptions.plist mirrormirror/ios/MirrorMirror/Info.plist mirrormirror/ios/MirrorMirror/PrivacyInfo.xcprivacy
+          /bin/bash -n mirrormirror/ios/release.sh
+
+      - name: Validate the App Store text and the icon (Arizona playbook rules)
+        run: |
+          set -eo pipefail
+          python3 mirrormirror/ios/store/validate_store_text.py
+          (cd mirrormirror/ios && python3 tools/check_icon.py)
+
+      - name: Dry-run release.sh with stand-in tools (system bash 3.2, real PlistBuddy)
+        run: |
+          set -eo pipefail
+          /bin/bash --version | head -1
+          /bin/bash mirrormirror/ios/tools/dry_run_release.sh
 
       - name: Archive Release unsigned (the same archive step release.sh runs, minus signing)
         run: |

@@ -1,0 +1,9 @@
+No accounts or sign-in. No test credentials are needed.
+
+Everything runs on the device: the front camera feeds an on-device face landmark model, the proportions are computed locally, and nothing is uploaded. The app works offline.
+
+Three readings are free. Opening the mirror a fourth time shows the paywall for Mirror Mirror Premium, an auto-renewing subscription of $0.99 per month. Restore Purchases is on the paywall. To see the paywall quickly, take three readings; the photo option ("Use a photo instead" on the first screen) is the fastest way to do that without the camera.
+
+Camera permission is requested when you tap "Open the mirror". The reading can also be taken from a photograph, with no camera permission.
+
+The score is entertainment: the app compares proportions with the golden ratio and states plainly that the golden ratio is not a validated measure of attractiveness. It makes no medical, health or psychological claims.

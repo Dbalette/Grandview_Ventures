@@ -6,7 +6,7 @@
 #   APPLE_TEAM_ID         your 10-character team id
 #   IOS_DIST_P12_BASE64   an Apple Distribution certificate exported from Keychain Access as .p12, base64-encoded
 #   IOS_DIST_P12_PASSWORD the password you gave that .p12
-# Submission to App Review itself is done in App Store Connect after the build has processed (see mirrormirror/ios/SUBMISSION.md).
+# Submission to App Review itself is done in App Store Connect after the build has processed (see mirrormirror/ios/PUBLISH.md).
 name: Mirror Mirror - upload to TestFlight
 
 on:

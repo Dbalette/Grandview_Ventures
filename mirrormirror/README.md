@@ -7,7 +7,7 @@ own symmetry. It gives a score out of 100 and shows every formula behind it.
 
 * **Web app**: this folder. Works on any phone browser over https (the camera needs a secure page).
   On GitHub Pages: `https://dbalette.github.io/Grandview_Ventures/mirrormirror/`
-* **iOS app**: `ios/`, a SwiftUI + WKWebView wrapper with a StoreKit 2 subscription. See `ios/SUBMISSION.md`.
+* **iOS app**: `ios/`, a SwiftUI + WKWebView wrapper with a StoreKit 2 subscription. See `ios/PUBLISH.md`.
 * **The math**: `methodology.html`, with sources. The engine is `js/phi.js`.
 
 ## How it works

@@ -1,0 +1,24 @@
+Mirror, mirror, on the wall, but this one shows its arithmetic.
+
+Mirror Mirror finds 478 points on your face with the front camera, measures the distances between them, and compares your proportions with the golden ratio (phi, 1.618), the classical canons of the sculptors, the findings of modern experiments on what people actually prefer, and your own left to right symmetry. You get a score out of 100 and, underneath it, every formula: the pixels, the millimeters, the ideal, the deviation, the points.
+
+WHAT YOU GET
+- The seven golden ratios of the face, with the working shown for each
+- Symmetry measured point by point against your facial axis
+- Second opinions from the classical canons and from modern research on preference
+- Pose and expression coaching, so the reading is fair
+- A comparison with the average face from published measurements
+- A card you can save and share
+
+HONEST BY DESIGN
+The golden ratio is a beautiful old idea, not a law of nature. Studies find it a weak predictor of who people find attractive, and the app says so. Treat the number as a parlor game with honest arithmetic, and the face in the glass as the thing itself.
+
+PRIVATE BY DESIGN
+Everything happens on your phone. No photograph, measurement or score ever leaves it. No account, no ads, no tracking, and the app works offline.
+
+Three readings are free. Mirror Mirror Premium gives you unlimited readings for $0.99 per month.
+
+Mirror Mirror Premium is an auto-renewing subscription of $0.99 per month. Payment will be charged to your Apple ID account at the confirmation of purchase. The subscription automatically renews unless it is cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions in your App Store account settings after purchase.
+
+Privacy Policy: https://dbalette.github.io/Grandview_Ventures/mirrormirror/privacy.html
+Terms of Use: https://dbalette.github.io/Grandview_Ventures/mirrormirror/terms.html
