@@ -3,9 +3,14 @@
 # Needs the same three repository secrets as mirrormirror-asc.yml (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8). Cloud signing needs
 # an Admin key. Order: run mirrormirror-asc.yml (preflight, register-bundle-id), create the app record in the App Store Connect
 # website, then run this. Submission to App Review is a separate step; see mirrormirror/ios/PUBLISH.md.
+# A push that touches this file only runs the small check job below, which also registers the workflow so it can be started by hand.
 name: Mirror Mirror - upload to App Store Connect
 
 on:
+  push:
+    paths:
+      - ".github/workflows/mirrormirror-testflight.yml"
+      - "mirrormirror/ios/ExportOptions.plist"
   workflow_dispatch:
     inputs:
       build_number:
@@ -21,7 +26,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-export-options:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ExportOptions.plist agrees with the Xcode project
+        run: |
+          python3 - <<'EOF'
+          import plistlib, re
+          opts = plistlib.load(open("mirrormirror/ios/ExportOptions.plist", "rb"))
+          pbx = open("mirrormirror/ios/MirrorMirror.xcodeproj/project.pbxproj").read()
+          teams = set(re.findall(r"DEVELOPMENT_TEAM = (\w+);", pbx))
+          assert opts["method"] == "app-store-connect" and opts["destination"] == "upload" and opts["signingStyle"] == "automatic", opts
+          assert teams == {opts["teamID"]}, (teams, opts["teamID"])
+          print("ExportOptions.plist: app-store-connect, upload, automatic signing, and the team matches the project")
+          EOF
+
   archive-and-upload:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     timeout-minutes: 60
     env:
