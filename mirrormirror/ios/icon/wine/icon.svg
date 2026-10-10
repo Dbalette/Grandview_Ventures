@@ -25,13 +25,14 @@
   <radialGradient id="bead" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff8dc"/><stop offset=".5" stop-color="#e3bd62"/><stop offset="1" stop-color="#8b6119"/></radialGradient>
   <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".30"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <radialGradient id="glow"><stop offset="0" stop-color="#fffbe8" stop-opacity=".95"/><stop offset=".35" stop-color="#ffe9a8" stop-opacity=".42"/><stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/></radialGradient>
+  
   <clipPath id="glassClip"><ellipse cx="512" cy="520" rx="252" ry="364"/></clipPath>
   <filter id="blur24" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="22"/></filter>
   <filter id="blur10" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
   <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
   <filter id="beadShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx=".8" dy="1.6" stdDeviation="1.2" flood-color="#2e1a04" flood-opacity=".6"/></filter>
 </defs>
-
+<g>
 <rect width="1024" height="1024" fill="#34091a"/>
 <rect width="1024" height="1024" fill="url(#bg)"/>
 <ellipse cx="512" cy="520" rx="430" ry="470" fill="url(#halo)"/>
@@ -66,4 +67,5 @@
 <!-- one glint on the bezel -->
 <g><circle cx="315.8" cy="237.2" r="40" fill="url(#glow)"/>
 <path d="M315.8 207.2 Q319.7 233.3 345.8 237.2 Q319.7 241.1 315.8 267.2 Q311.9 241.1 285.8 237.2 Q311.9 233.3 315.8 207.2 Z" fill="#fffaf0"/><path d="M315.8 223.2 Q318.6 234.4 329.8 237.2 Q318.6 240.0 315.8 251.2 Q313.0 240.0 301.8 237.2 Q313.0 234.4 315.8 223.2 Z" transform="rotate(45 315.8 237.2)" fill="#fffaf0"/></g>
+</g>
 </svg>

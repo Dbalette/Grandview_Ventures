@@ -129,6 +129,7 @@ there is, the Manage questionnaire answer is "None of the algorithms mentioned a
 | `release.sh`, `Open in Xcode.command` | one-command archive and upload from a Mac; double-click launcher |
 | `tools/asc.py` | App Store Connect API helper for the cloud route (`preflight`, `register-bundle-id`, offline `selftest`) |
 | `../../.github/workflows/mirrormirror-asc.yml`, `mirrormirror-testflight.yml` | the cloud route: API commands on Ubuntu; archive, cloud-sign and upload on macOS |
+| `icon/` | the icon: SVG sources, the generator, and both colourways; midnight and gold is installed |
 | `tools/check_icon.py` | numeric icon check: 1024 by 1024, opaque, nothing but background where the iOS mask clips |
 | `tools/dry_run_release.sh` | dry run of `release.sh` with stand-in tools (CI runs it with the system bash) |
 | `store/*.txt`, `store/validate_store_text.py` | the App Store Connect text and its validator |

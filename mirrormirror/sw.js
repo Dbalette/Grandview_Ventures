@@ -2,7 +2,7 @@
    Shell files: cache first, refreshed in the background.
    Face model and vision library: cache first (they are versioned by URL), so the
    mirror keeps working offline once it has been opened once. */
-const VERSION = 'mm-v4';
+const VERSION = 'mm-v5';
 const SHELL = [
   './', './index.html', './methodology.html', './privacy.html', './terms.html', './manifest.webmanifest',
   './css/style.css', './js/app.js', './js/ui.js', './js/phi.js', './js/geometry.js', './js/landmarks.js',

@@ -1,7 +1,9 @@
 // Mirror Mirror on The Wall: the restrained version. A gold-bezelled oval mirror whose glass holds an exact golden spiral
 // drawn over the golden-rectangle construction it comes from.
-// Usage: node make_icon.cjs <outDir> [wine|navy]
+// Usage: node make_icon.cjs <outDir> [wine|navy] [--web <iconsDir>]
 // Writes <outDir>/icon.svg and <outDir>/icon-1024.png (opaque, square: iOS rounds the corners itself).
+// With --web it also writes the web app's icon set into <iconsDir>: a light rounded icon.svg for the favicon and manifest,
+// icon-192.png and icon-512.png with rounded corners, an opaque apple-touch-icon.png, and a full-bleed icon-maskable-512.png.
 // ROT (90 or 270) and FLIP (0 or 1) choose which way the spiral turns; PRINT=1 lists where the eye lands for each choice.
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -118,7 +120,7 @@ function star(cx, cy, r, k = 0.13) {
     `Q${f(cx - q)} ${f(cy + q)} ${f(cx - r)} ${f(cy)} Q${f(cx - q)} ${f(cy - q)} ${f(cx)} ${f(cy - r)} Z`;
 }
 
-const pts = spiral(900).map((p) => [...toCanvas(p), p[2], p[3]]);
+const spiralPts = (n) => spiral(n).map((p) => [...toCanvas(p), p[2], p[3]]);
 const eye = toCanvas(POLE);
 const rectPath = (x, y, s, h = s) => 'M' + [[x, y], [x + s, y], [x + s, y + h], [x, y + h]].map((p) => toCanvas(p).map(f).join(' ')).join(' L') + ' Z';
 const guideSquares = squares(9).map(([x, y, s]) => rectPath(x, y, s)).join(' ');
@@ -132,7 +134,12 @@ const beads = equalArc(A - TH / 2, B - TH / 2, 120).map((t) => {
 // flare on the bezel, upper left
 const flare = [CX - A * 0.672, CY - B * 0.70];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" width="${W}" height="${W}">
+function buildSvg({ lite = false, round = false } = {}) {
+  const pts = spiralPts(lite ? 160 : 900);
+  const guides = lite ? '' : `<path d="${guideSquares}" fill="none" stroke="#f1d58a" stroke-opacity=".26" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="${guideOuter}" fill="none" stroke="#f1d58a" stroke-opacity=".42" stroke-width="2.4" stroke-linejoin="round"/>`;
+  const beadRing = lite ? '' : `<g filter="url(#beadShadow)">${beads}</g>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" width="${W}" height="${W}">
 <defs>
   <radialGradient id="bg" cx="${CX}" cy="${CY - 70}" r="640" gradientUnits="userSpaceOnUse">
     <stop offset="0" stop-color="${THEMES_BG(0)}"/><stop offset=".48" stop-color="${THEMES_BG(1)}"/><stop offset=".84" stop-color="${THEMES_BG(2)}"/><stop offset="1" stop-color="${THEMES_BG(2)}"/>
@@ -159,13 +166,14 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" wid
   <radialGradient id="bead" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff8dc"/><stop offset=".5" stop-color="#e3bd62"/><stop offset="1" stop-color="#8b6119"/></radialGradient>
   <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".30"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <radialGradient id="glow"><stop offset="0" stop-color="#fffbe8" stop-opacity=".95"/><stop offset=".35" stop-color="#ffe9a8" stop-opacity=".42"/><stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/></radialGradient>
+  ${round ? `<clipPath id="tile"><rect width="${W}" height="${W}" rx="229" ry="229"/></clipPath>` : ''}
   <clipPath id="glassClip"><ellipse cx="${CX}" cy="${CY}" rx="${GA}" ry="${GB}"/></clipPath>
   <filter id="blur24" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="22"/></filter>
   <filter id="blur10" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
   <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
   <filter id="beadShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx=".8" dy="1.6" stdDeviation="1.2" flood-color="#2e1a04" flood-opacity=".6"/></filter>
 </defs>
-
+${round ? '<g clip-path="url(#tile)">' : '<g>'}
 <rect width="${W}" height="${W}" fill="${THEMES_BG(2)}"/>
 <rect width="${W}" height="${W}" fill="url(#bg)"/>
 <ellipse cx="${CX}" cy="${CY}" rx="430" ry="470" fill="url(#halo)"/>
@@ -176,7 +184,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" wid
 <ellipse cx="${CX}" cy="${CY}" rx="${A - 7}" ry="${B - 7}" fill="none" stroke="#fff6cf" stroke-width="2.5" opacity=".7"/>
 <ellipse cx="${CX}" cy="${CY}" rx="${A - TH + 8}" ry="${B - TH + 8}" fill="none" stroke="#5a3b0a" stroke-width="2.5" opacity=".55"/>
 <ellipse cx="${CX}" cy="${CY}" rx="${A - TH + 11}" ry="${B - TH + 11}" fill="none" stroke="#fff0b8" stroke-width="1.5" opacity=".5"/>
-<g filter="url(#beadShadow)">${beads}</g>
+${beadRing}
 <ellipse cx="${CX}" cy="${CY}" rx="${GA + 5}" ry="${GB + 5}" fill="url(#goldRev)" stroke="#432b07" stroke-width="2"/>
 
 <!-- glass -->
@@ -184,8 +192,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" wid
 <g clip-path="url(#glassClip)">
   <ellipse cx="${CX}" cy="${CY}" rx="${GA}" ry="${GB}" fill="url(#vignette)"/>
   <rect x="${CX - GA}" y="${CY - GB}" width="${2 * GA}" height="${2 * GB}" fill="url(#eyeGlow)"/>
-  <path d="${guideSquares}" fill="none" stroke="#f1d58a" stroke-opacity=".26" stroke-width="2.4" stroke-linejoin="round"/>
-  <path d="${guideOuter}" fill="none" stroke="#f1d58a" stroke-opacity=".42" stroke-width="2.4" stroke-linejoin="round"/>
+  ${guides}
   <path d="${ribbon(pts, 1, 14)}" fill="#f2c968" opacity=".42" filter="url(#blur10)"/>
   <path d="${ribbon(pts, 1, 0)}" fill="url(#spiralGold)"/>
   <path d="${ribbon(pts, 0.3, 0, -0.2)}" fill="#fffdf0" opacity=".8"/>
@@ -200,19 +207,39 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" wid
 <!-- one glint on the bezel -->
 <g><circle cx="${f(flare[0])}" cy="${f(flare[1])}" r="40" fill="url(#glow)"/>
 <path d="${star(flare[0], flare[1], 30)}" fill="#fffaf0"/><path d="${star(flare[0], flare[1], 14, 0.2)}" transform="rotate(45 ${f(flare[0])} ${f(flare[1])})" fill="#fffaf0"/></g>
+</g>
 </svg>`;
+}
 
 function THEMES_BG(i) { return THEME.bg[i]; }
 
+async function renderPng(page, svg, size, file, transparent) {
+  await page.setViewportSize({ width: size, height: size });
+  await page.setContent(`<!doctype html><html><head><style>html,body{margin:0;background:${transparent ? 'transparent' : THEME.bg[2]}}svg{display:block;width:${size}px;height:${size}px}</style></head><body>${svg}</body></html>`);
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: file, omitBackground: transparent, clip: { x: 0, y: 0, width: size, height: size } });
+  console.log('wrote', file);
+}
+
+const webAt = process.argv.indexOf('--web');
+const WEB = webAt >= 0 ? process.argv[webAt + 1] : null;
+
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  fs.writeFileSync(path.join(OUT, 'icon.svg'), svg);
+  const full = buildSvg();
+  fs.writeFileSync(path.join(OUT, 'icon.svg'), full);
   const b = await chromium.launch();
   const p = await b.newPage({ deviceScaleFactor: 1 });
-  await p.setViewportSize({ width: W, height: W });
-  await p.setContent(`<!doctype html><html><head><style>html,body{margin:0;background:${THEME.bg[2]}}svg{display:block}</style></head><body>${svg}</body></html>`);
-  await p.waitForTimeout(200);
-  await p.screenshot({ path: path.join(OUT, 'icon-1024.png'), omitBackground: false, clip: { x: 0, y: 0, width: W, height: W } });
+  await renderPng(p, full, W, path.join(OUT, 'icon-1024.png'), false);
+  if (WEB) {
+    fs.mkdirSync(WEB, { recursive: true });
+    fs.writeFileSync(path.join(WEB, 'icon.svg'), buildSvg({ lite: true, round: true }));
+    console.log('wrote', path.join(WEB, 'icon.svg'));
+    const rounded = buildSvg({ round: true });
+    await renderPng(p, rounded, 512, path.join(WEB, 'icon-512.png'), true);
+    await renderPng(p, rounded, 192, path.join(WEB, 'icon-192.png'), true);
+    await renderPng(p, full, 180, path.join(WEB, 'apple-touch-icon.png'), false);
+    await renderPng(p, full, 512, path.join(WEB, 'icon-maskable-512.png'), false);
+  }
   await b.close();
-  console.log('wrote', path.join(OUT, 'icon-1024.png'), 'scale', f(S), 'eye', f(eye[0]), f(eye[1]));
 })().catch((e) => { console.error(e); process.exit(1); });
