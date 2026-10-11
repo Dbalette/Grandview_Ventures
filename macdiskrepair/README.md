@@ -59,6 +59,13 @@ Without `--execute` every command is a dry run that prints what it would do.
 | D | Failing. Many unreadable blocks or remap did not clear them. Retire after rescue. |
 | F | Dead or dying. SMART failed or large unreadable regions. |
 
+## First-run requirement: Full Disk Access
+
+macOS blocks raw device reads (`/dev/rdiskN`) even under `sudo` until the
+terminal app has Full Disk Access. The symptom is `Operation not permitted`
+(errno 1). Grant it once: System Settings > Privacy & Security > Full Disk
+Access > enable Terminal, then quit and reopen Terminal.
+
 ## Honest limits
 
 * **SMART over USB 3.x is normally unavailable on macOS.** The kernel exposes no

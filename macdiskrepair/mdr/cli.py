@@ -104,6 +104,26 @@ def progress_printer(total: int):
     return _p
 
 
+
+
+FDA_HINT = ("macOS refused raw access to {node} (errno 1, Operation not permitted). This is the Full Disk Access "
+            "privacy gate, not a disk fault. Fix: System Settings > Privacy & Security > Full Disk Access > enable "
+            "Terminal (or your terminal app), then quit and reopen Terminal and rerun with sudo.")
+
+
+def open_device_or_die(opener, node: str):
+    """Call opener(node); translate the macOS TCC permission error into a human hint."""
+    try:
+        return opener(node)
+    except PermissionError as exc:
+        if exc.errno == 1:
+            die(FDA_HINT.format(node=node))
+        die(f"cannot open {node}: {exc} (are you running with sudo?)")
+    except OSError as exc:
+        if exc.errno == 16:
+            die(f"{node} is busy: a volume is still mounted. Run: diskutil unmountDisk {node.split('/')[-1].lstrip('r')}")
+        die(f"cannot open {node}: {exc}")
+
 # --------------------------------------------------------------- commands ---
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -232,7 +252,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
         eprint(f"Resuming scan at {human_size(bm.next_offset)} ({bm.bad_blocks} bad blocks so far)")
     else:
         bm = surface.BadMap(device=di.raw_node, block_size=di.block_size, total_bytes=di.size)
-    reader, closer = surface.device_reader(di.raw_node)
+    reader, closer = open_device_or_die(surface.device_reader, di.raw_node)
     try:
         eprint(f"Scanning {di.raw_node} ({human_size(di.size, binary=False)}) read-only, {args.chunk_mib} MiB chunks. Ctrl-C to pause; rerun to resume.")
         surface.scan(reader, bm, chunk_bytes=args.chunk_mib << 20, progress=progress_printer(di.size),
@@ -279,6 +299,8 @@ def cmd_rescue(args: argparse.Namespace) -> int:
         print("\nDry run. Add --execute to run the passes.")
         return 0
     need_root("ddrescue on a raw device")
+    _r, _c = open_device_or_die(surface.device_reader, di.raw_node)
+    _c()
     rc = 0
     for c in cmds:
         eprint(f"\n==> {shell_join(c)}")
@@ -400,7 +422,7 @@ def cmd_remap(args: argparse.Namespace) -> int:
     need_root("raw device writes")
     if not safety.confirm_typed(ident, f"About to OVERWRITE {bm.bad_blocks} unreadable blocks on {ident} with zeros. Data in those blocks is already unreadable and will be gone for good."):
         die("aborted by operator")
-    reader, writer, closer = remap_mod.device_rw(di.raw_node)
+    reader, writer, closer = open_device_or_die(remap_mod.device_rw, di.raw_node)
     try:
         res = remap_mod.zero_fill(reader, writer, bm, pad_blocks=args.pad)
     finally:

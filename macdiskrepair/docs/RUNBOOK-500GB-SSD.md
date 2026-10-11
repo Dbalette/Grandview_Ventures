@@ -14,6 +14,12 @@ plugged into a Mac, with some blocks that fail to read.
 * Do not run First Aid in Disk Utility yet. Repairs write metadata; on a disk
   with unreadable blocks that can make recovery worse. Image first.
 
+## 0b. Give Terminal Full Disk Access
+
+System Settings > Privacy & Security > Full Disk Access > turn on Terminal,
+then quit and reopen Terminal. Without it every raw read fails with
+`Operation not permitted`, even with sudo.
+
 ## 1. Install and detect
 
 ```bash
