@@ -208,7 +208,7 @@ def cmd_health(args: argparse.Namespace) -> int:
         for v in fs["volumes"]:
             print(f"  {v['identifier']:10} {v['filesystem']:8} {v['volume_name']!r:24} verify: {'OK' if v['ok'] else 'ERRORS'}")
     print()
-    print(f"Grade {assessment.grade} (score {assessment.score}/100): {assessment.recommendation}")
+    print(f"Grade {assessment.label} (score {assessment.score}/100): {assessment.recommendation}")
     for r in assessment.reasons:
         print(f"  - {r}")
     if not badmap:

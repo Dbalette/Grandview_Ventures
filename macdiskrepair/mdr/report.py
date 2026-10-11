@@ -22,6 +22,11 @@ class Assessment:
     score: int  # 0..100
     reasons: List[str] = field(default_factory=list)
     recommendation: str = ""
+    provisional: bool = False  # True when neither SMART nor a complete surface scan backs the grade
+
+    @property
+    def label(self) -> str:
+        return f"{self.grade} (provisional)" if self.provisional else self.grade
 
 
 def grade(smart: Optional[Dict[str, Any]], badmap: Optional[Dict[str, Any]], fs: Optional[Dict[str, Any]],
@@ -118,7 +123,13 @@ def grade(smart: Optional[Dict[str, Any]], badmap: Optional[Dict[str, Any]], fs:
     else:
         g = "F"
     rec = GRADE_TEXT[g]
-    return Assessment(grade=g, score=score, reasons=reasons, recommendation=rec)
+    has_smart = bool(smart and smart.get("available"))
+    has_scan = bool(badmap and badmap.get("complete"))
+    provisional = not (has_smart or has_scan)
+    if provisional:
+        reasons.append("PROVISIONAL: no SMART and no complete surface scan yet; verify only checks metadata, not every sector")
+        rec = "Not yet rated. Filesystem metadata is consistent, but the sectors have not been read. Run the surface scan."
+    return Assessment(grade=g, score=score, reasons=reasons, recommendation=rec, provisional=provisional)
 
 
 def render_markdown(title: str, disk: Dict[str, Any], smart: Optional[Dict[str, Any]], smart_findings: List[Dict[str, str]],
@@ -129,7 +140,7 @@ def render_markdown(title: str, disk: Dict[str, Any], smart: Optional[Dict[str, 
     L.append("")
     L.append(f"Generated {now_iso()} by Mac Disk Repair.")
     L.append("")
-    L.append(f"## Verdict: grade {assessment.grade} (score {assessment.score}/100)")
+    L.append(f"## Verdict: grade {assessment.label} (score {assessment.score}/100)")
     L.append("")
     L.append(assessment.recommendation)
     L.append("")

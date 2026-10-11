@@ -75,6 +75,19 @@ class Grading(unittest.TestCase):
         a = report.grade(None, badmap, None, {"attempted_blocks": 5000, "still_bad": 4000})
         self.assertIn(a.grade, ("D", "F"))
 
+    def test_provisional_without_smart_or_scan(self):
+        fs = {"partition_map_ok": True, "volumes": [{"ok": True}]}
+        a = report.grade({"available": False}, None, fs)
+        self.assertTrue(a.provisional)
+        self.assertIn("provisional", a.label)
+        self.assertIn("Not yet rated", a.recommendation)
+        # An incomplete scan is still provisional; a complete one is not.
+        a2 = report.grade({"available": False}, {"bad_blocks": 0, "bad_bytes": 0, "total_bytes": 10, "complete": False}, fs)
+        self.assertTrue(a2.provisional)
+        a3 = report.grade({"available": False}, {"bad_blocks": 0, "bad_bytes": 0, "total_bytes": 10, "complete": True}, fs)
+        self.assertFalse(a3.provisional)
+        self.assertEqual(a3.grade, "A")
+
     def test_render_markdown(self):
         a = report.grade(None, None, None)
         md = report.render_markdown("T", {"identifier": "disk4", "size": 10}, None, [], None, None, None, None, a)

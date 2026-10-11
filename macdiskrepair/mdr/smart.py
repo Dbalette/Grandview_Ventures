@@ -98,10 +98,14 @@ def read(device_node: str) -> SmartSummary:
             summary.device_type_used = dtype or "auto"
             return summary
         last_err = summary.reason or last_err
-    reason = last_err or "no SMART response"
-    if "Operation not supported" in reason or "Unable to detect device type" in reason or not reason:
-        reason += " (USB 3.x enclosures on macOS do not pass SMART through; a Thunderbolt/USB4 enclosure or a direct SATA/NVMe attach would)"
-    return SmartSummary(available=False, reason=reason.strip())
+    reason = (last_err or "no SMART response").strip()
+    if "VALID ARGUMENTS ARE" in reason or "Not a device of type" in reason:
+        reason = reason.split(";")[0].strip()
+    if len(reason) > 160:
+        reason = reason[:157] + "..."
+    reason += f" [tried -d {', '.join(t or 'auto' for t in DEVICE_TYPES)}]"
+    reason += " (macOS does not pass SMART through USB enclosures; Thunderbolt/USB4 or a direct SATA attach would)"
+    return SmartSummary(available=False, reason=reason)
 
 
 def _attr_raw(table: List[Dict[str, Any]], attr_id: int) -> Optional[int]:
