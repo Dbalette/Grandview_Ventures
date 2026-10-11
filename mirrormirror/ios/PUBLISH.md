@@ -5,6 +5,11 @@ playbook: the ArizonaExplained repository, branch `session/news-headline-and-cha
 `main` in that repository still has the older playbook without section 12. The app is free to download with three free readings, then
 **Mirror Mirror Premium at US$0.99 a month** (product id `com.grandviewventures.mirrormirror.monthly`).
 
+**Status on 2026-10-11.** Nothing has been submitted from this branch. The three repository secrets for the cloud route are still not set, so
+the preflight stops at its first line. The pages that were added to `main` on 2026-10-07 describe a newer app than this branch holds: it is
+named **Mirror Mirror: Golden Ratio** and reads six public-domain paintings, which nothing here contains. Find where that version lives
+before submitting anything from this copy, which would send the older build and the public-figure comparison names.
+
 **Two routes.** The Mac route (steps 0 to 12 below) follows the playbook: Xcode on your Mac does the upload and a signed-in browser does
 App Store Connect. The cloud route needs no Mac and no Xcode login: GitHub Actions authenticates with an App Store Connect API key.
 Apple's API reference has a Build Upload resource for the binary and lists no create-app call, so creating the app record and the App
@@ -56,8 +61,8 @@ the share sheet, the first upload, and every App Store Connect step.
 | Bundle id | `com.grandviewventures.mirrormirror` | Frozen at the first uploaded build |
 | Price | free app, subscription US$0.99 a month | Yours to confirm; also the countries |
 | Release | manual after approval (recommended) | Automatic release ships the moment it is approved |
-| Public push of the support pages | merge this branch to main | Publishes the Pages URLs; poll `curl -sI` until 200 before pasting them |
-| Where the source lives | public Grandview_Ventures repo | The playbook keeps app source in a private repo and only the pages here |
+| Support, privacy and terms pages | already live: added to `main` on 2026-10-07 as **Mirror Mirror: Golden Ratio** | **Do not merge this branch to main.** Its `mirrormirror/` folder holds the whole app, and its `index.html`, `privacy.html` and `terms.html` would overwrite those pages |
+| Where the source lives | this public repo, on a branch only | The playbook keeps app source in a private repo and only the pages here. Move it before any merge |
 | Submit for Review | not yet | Irreversible |
 
 ## Order (playbook 12.7)
