@@ -1,0 +1,10 @@
+#!/bin/bash
+# Entry point for Mac Disk Repair. Resolves symlinks so `brew --prefix`/bin/mdr works.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+ROOT="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+exec /usr/bin/env python3 "$ROOT/mdr/cli.py" "$@"

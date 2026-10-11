@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BusProtocol</key><string>USB</string>
+	<key>Content</key><string>Apple_HFS</string>
+	<key>DeviceBlockSize</key><integer>512</integer>
+	<key>DeviceIdentifier</key><string>disk4s2</string>
+	<key>DeviceNode</key><string>/dev/disk4s2</string>
+	<key>FilesystemType</key><string>hfs</string>
+	<key>Internal</key><false/>
+	<key>MountPoint</key><string>/Volumes/OldSSD</string>
+	<key>ParentWholeDisk</key><string>disk4</string>
+	<key>Size</key><integer>499898105856</integer>
+	<key>TotalSize</key><integer>499898105856</integer>
+	<key>VolumeName</key><string>OldSSD</string>
+	<key>WholeDisk</key><false/>
+	<key>WritableMedia</key><true/>
+</dict>
+</plist>

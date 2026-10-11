@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mac Disk Repair - Support &amp; Privacy Policy</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 680px; margin: 60px auto; padding: 0 20px; line-height: 1.6; color: #1d1d1f; }
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.2rem; margin-top: 2rem; }
+  a { color: #06c; }
+  code { background: #f5f5f7; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>Mac Disk Repair</h1>
+
+<h2>Support</h2>
+<p>Mac Disk Repair assesses the health of an external disk, images it with GNU ddrescue, forces a solid-state drive to retire its unreadable blocks, repairs the filesystem with Apple's own tools, and writes a graded report.</p>
+
+<p><strong>What does it need?</strong><br/>
+macOS, Homebrew, and administrator rights (<code>sudo</code>) for anything that reads or writes the raw disk. Install with <code>./install.sh</code> and check with <code>mdr doctor</code>.</p>
+
+<p><strong>Will it damage my disk?</strong><br/>
+Read-only commands (<code>detect</code>, <code>health</code>, <code>scan</code>) never write. Writing commands dry-run by default, refuse internal and boot disks, require the disk to be unmounted, and ask you to type the disk identifier before proceeding. The remap step only overwrites blocks that already fail to read, and only after a full image exists.</p>
+
+<p><strong>Why does it say SMART is not readable?</strong><br/>
+macOS does not pass SMART commands through USB 3 enclosures. A Thunderbolt or USB4 enclosure, or a direct SATA/NVMe connection, allows it. The surface scan does not depend on SMART.</p>
+
+<p>Still stuck, or found a bug? Contact <a href="mailto:dman937942@gmail.com">dman937942@gmail.com</a>.</p>
+
+<h2>Privacy Policy</h2>
+<p><em>Last updated: October 2026</em></p>
+
+<p>Mac Disk Repair does not collect, transmit, or share any personal data. It has no account system, no analytics, no advertising, and makes no network requests of its own.</p>
+
+<p><strong>What data is stored:</strong> Scan results, bad-block maps, rescue images and reports are written only to the folders you choose on your own machine (<code>--workdir</code> and <code>--to</code>). They never leave your device unless you move them.</p>
+
+<p><strong>What data we collect:</strong> None.</p>
+
+<p><strong>Third-party tools:</strong> The app calls Apple's <code>diskutil</code>, <code>hdiutil</code> and <code>fsck</code> tools and the Homebrew packages smartmontools, ddrescue, testdisk, f3, pv and gptfdisk, which run locally under their own licenses.</p>
+
+<p><strong>Changes:</strong> If this policy changes, the updated version will be posted on this page with a new date.</p>
+</body>
+</html>

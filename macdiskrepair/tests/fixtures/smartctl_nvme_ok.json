@@ -1,0 +1,16 @@
+{
+  "json_format_version": [1, 0],
+  "smartctl": {"version": [7, 5], "exit_status": 0},
+  "device": {"name": "/dev/disk5", "type": "nvme", "protocol": "NVMe"},
+  "model_name": "WD Blue SN570 500GB",
+  "serial_number": "2234AB123456",
+  "firmware_version": "234110WD",
+  "user_capacity": {"bytes": 500107862016},
+  "smart_status": {"passed": true, "nvme": {"value": 0}},
+  "power_on_time": {"hours": 812},
+  "temperature": {"current": 41},
+  "nvme_smart_health_information_log": {
+    "critical_warning": 0, "temperature": 41, "available_spare": 100, "available_spare_threshold": 10,
+    "percentage_used": 1, "media_errors": 0, "unsafe_shutdowns": 4, "power_on_hours": 812
+  }
+}

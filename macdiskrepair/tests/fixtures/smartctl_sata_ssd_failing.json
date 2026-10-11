@@ -1,0 +1,27 @@
+{
+  "json_format_version": [1, 0],
+  "smartctl": {"version": [7, 5], "exit_status": 72},
+  "device": {"name": "/dev/disk4", "type": "sat", "protocol": "ATA"},
+  "model_name": "Samsung SSD 850 EVO 500GB",
+  "serial_number": "S21JNXAG123456X",
+  "firmware_version": "EMT02B6Q",
+  "user_capacity": {"blocks": 976773168, "bytes": 500107862016},
+  "smart_status": {"passed": true},
+  "power_on_time": {"hours": 41230},
+  "power_cycle_count": 2310,
+  "temperature": {"current": 38},
+  "ata_smart_attributes": {
+    "table": [
+      {"id": 5, "name": "Reallocated_Sector_Ct", "value": 96, "worst": 96, "thresh": 10, "when_failed": "", "raw": {"value": 14, "string": "14"}},
+      {"id": 9, "name": "Power_On_Hours", "value": 91, "worst": 91, "thresh": 0, "when_failed": "", "raw": {"value": 41230, "string": "41230"}},
+      {"id": 177, "name": "Wear_Leveling_Count", "value": 22, "worst": 22, "thresh": 0, "when_failed": "", "raw": {"value": 2611, "string": "2611"}},
+      {"id": 181, "name": "Program_Fail_Cnt_Total", "value": 100, "worst": 100, "thresh": 10, "when_failed": "", "raw": {"value": 0, "string": "0"}},
+      {"id": 182, "name": "Erase_Fail_Count_Total", "value": 100, "worst": 100, "thresh": 10, "when_failed": "", "raw": {"value": 3, "string": "3"}},
+      {"id": 183, "name": "Runtime_Bad_Block", "value": 96, "worst": 96, "thresh": 10, "when_failed": "", "raw": {"value": 14, "string": "14"}},
+      {"id": 187, "name": "Uncorrectable_Error_Cnt", "value": 100, "worst": 100, "thresh": 0, "when_failed": "", "raw": {"value": 27, "string": "27"}},
+      {"id": 197, "name": "Current_Pending_Sector", "value": 100, "worst": 100, "thresh": 0, "when_failed": "", "raw": {"value": 6, "string": "6"}},
+      {"id": 198, "name": "Offline_Uncorrectable", "value": 100, "worst": 100, "thresh": 0, "when_failed": "", "raw": {"value": 6, "string": "6"}},
+      {"id": 199, "name": "UDMA_CRC_Error_Count", "value": 100, "worst": 100, "thresh": 0, "when_failed": "", "raw": {"value": 0, "string": "0"}}
+    ]
+  }
+}

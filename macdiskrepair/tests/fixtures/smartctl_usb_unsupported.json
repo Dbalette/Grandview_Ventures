@@ -1,0 +1,6 @@
+{
+  "json_format_version": [1, 0],
+  "smartctl": {"version": [7, 5], "exit_status": 2,
+    "messages": [{"string": "/dev/disk4: Unable to detect device type", "severity": "error"}]},
+  "device": {"name": "/dev/disk4", "type": "", "protocol": ""}
+}

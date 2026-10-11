@@ -1,0 +1,15 @@
+# Mac Disk Repair - Homebrew dependencies
+# Install with:  brew bundle --file=Brewfile
+#
+# smartmontools : smartctl / smartd, SMART health readout (ATA + NVMe + SAT bridges)
+# ddrescue      : GNU ddrescue, fault-tolerant block copy with a resumable mapfile
+# testdisk      : TestDisk (partition table rebuild) + PhotoRec (file carving)
+# pv            : pipe viewer, progress for dd-style pipelines
+# gptfdisk      : gdisk/sgdisk, GPT inspection and backup
+# f3            : Fight Flash Fraud, capacity/true-size probe for flash media
+brew "smartmontools"
+brew "ddrescue"
+brew "testdisk"
+brew "pv"
+brew "gptfdisk"
+brew "f3"

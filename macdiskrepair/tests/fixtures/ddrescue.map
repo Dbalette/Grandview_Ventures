@@ -1,0 +1,13 @@
+# Mapfile. Created by GNU ddrescue version 1.30
+# Command line: ddrescue -b 512 -r3 /dev/rdisk4 /Volumes/Backup/disk4.img /Volumes/Backup/disk4.map
+# Start time:   2026-10-11 10:00:00
+# Current time: 2026-10-11 13:12:41
+# Finished
+# current_pos  current_status  current_pass
+0x7470C00000     +               3
+#      pos        size  status
+0x00000000  0x12A05F200  +
+0x12A05F200  0x00000400  -
+0x12A05F600  0x3B9ACA000  +
+0x4E3B29600  0x00001000  -
+0x4E3B2A600  0x6F8E6D5A00  +
