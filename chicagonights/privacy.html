@@ -23,7 +23,7 @@ Two places. A hand-researched list of Chicago venues, written up firsthand, ship
 <p><strong>Does this app require an internet connection?</strong><br/>
 No. The venue list and the itinerary planner work fully offline, using the venues bundled with the app plus anything previously saved on your device.</p>
 
-<p>The app does use the internet when it is available. On launch it may make one read-only request to the public Overpass API to refresh the venue list, at most about once a week per install, not on every launch. If that request fails, or you are offline, the app falls back to the list it already has and keeps working. Tapping "Directions in Maps" also opens Apple Maps, which is a separate app.</p>
+<p>The app does use the internet when it is available. On launch it may make a small set of read-only requests (typically 10 to 20, each for one section of the map) to the public Overpass API to refresh the venue list, at most about once a week per install, not on every launch. If that request fails, or you are offline, the app falls back to the list it already has and keeps working. Tapping "Directions in Maps" also opens Apple Maps, which is a separate app.</p>
 
 <p><strong>Does the app use my location?</strong><br/>
 No. Chicago Nights does not request or use your location. Directions open in Apple Maps, which handles your location itself, separately from this app.</p>
@@ -37,7 +37,7 @@ No. Chicago Nights does not request or use your location. Directions open in App
 
 <p><strong>What data is stored:</strong> Your preferences (such as your chosen vibe, budget, or neighborhood) and a cache of venue data are kept locally on your device. This data never leaves your device. It is not transmitted to us, to Apple, or to any third party.</p>
 
-<p><strong>What the app sends:</strong> When it refreshes the venue list, the app sends a single fixed query for public venue information in Chicago to the Overpass API at overpass-api.de. That query is the same for every user and contains no personal information, no device identifier, and nothing about you or your choices in the app. As with any request to any internet server, the operator of that server necessarily receives the network address the request came from, and their handling of it is governed by their own policies. We receive none of it, and we run no server of our own.</p>
+<p><strong>What the app sends:</strong> When it refreshes the venue list, the app sends a small set of fixed queries for public venue information, each for one section of Chicago, to the Overpass API at overpass-api.de. Those queries are the same for every user and contains no personal information, no device identifier, and nothing about you or your choices in the app. As with any request to any internet server, the operator of that server necessarily receives the network address the request came from, and their handling of it is governed by their own policies. We receive none of it, and we run no server of our own.</p>
 
 <p><strong>What data we collect:</strong> None. We operate no server, no account system, and no analytics. Nothing you do in this app is reported to us.</p>
 
